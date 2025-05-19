@@ -1,0 +1,297 @@
+/* Image de fond en fixed */
+body {
+  background-image: url("img/bg_dark_polygon.jpg"); /* Remplacez par l'URL de votre image */
+  background-size: cover;
+  background-attachment: fixed;
+  background-position: center;
+  color: #fff; /* Texte blanc pour contraster avec l'image */
+}
+
+/* Titres en violet */
+h1 {
+  color: #6a0dad; /* Violet */
+}
+
+/* Boutons en violet */
+.btn-primary {
+  background-color: #6a0dad; /* Violet */
+  border-color: #6a0dad;
+}
+
+.btn-primary:hover {
+  background-color: #5a009d; /* Violet plus foncé au survol */
+  border-color: #5a009d;
+}
+
+/* Bouton "Ajouter à ma liste" en violet */
+.btn-success {
+  background-color: #6a0dad; /* Violet */
+  border-color: #6a0dad;
+}
+
+.btn-success:hover {
+  background-color: #5a009d; /* Violet plus foncé au survol */
+  border-color: #5a009d;
+}
+
+.btn-secondary {
+  background-color: #6a0dad; /* Violet */
+  border-color: #6a0dad;
+  color: #fff; /* Texte blanc */
+}
+
+.btn-secondary:hover {
+  background-color: #5a009d; /* Violet plus foncé au survol */
+  border-color: #5a009d;
+}
+
+/* Suggestions de recherche */
+#suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 1000;
+  background: white;
+  border: 1px solid #ccc;
+  max-height: 200px;
+  overflow-y: auto;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Masquer le conteneur des suggestions lorsqu'il est vide */
+#suggestions:empty {
+  display: none;
+}
+
+#suggestions .list-group-item {
+  cursor: pointer;
+  padding: 10px;
+}
+
+#suggestions .list-group-item:hover {
+  background-color: #f0f0f0;
+}
+
+/* Assurez-vous que les images dans la modal sont bien ajustées */
+.modal img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Marges pour les éléments du modal */
+.modal-body h3 {
+  margin-top: 0;
+}
+
+.modal-body p {
+  margin-bottom: 10px;
+}
+
+/* Couleur de fond noire pour le modal */
+.modal-content {
+  background-color: #000; /* Noir */
+  color: #fff; /* Texte blanc */
+}
+
+/* Boutons dans le modal */
+.modal-content .btn {
+  color: #fff; /* Texte blanc */
+  background-color: #6a0dad; /* Violet */
+  border-color: #6a0dad;
+}
+
+.modal-content .btn:hover {
+  background-color: #5a009d; /* Violet plus foncé au survol */
+  border-color: #5a009d;
+}
+
+/* Couleur de la croix pour fermer le modal */
+.modal-header .btn-close {
+  filter: invert(1); /* Inverse la couleur pour s'adapter au fond noir */
+}
+
+/* Conteneur des acteurs principaux */
+#filmActors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  justify-content: start;
+}
+
+/* Images des acteurs */
+#filmActors img {
+  width: 100px;
+  height: auto;
+  border-radius: 8px;
+}
+
+/* Noms des acteurs */
+#filmActors p {
+  font-size: 0.9rem;
+  margin-top: 5px;
+  text-align: center;
+  color: #fff;
+}
+
+.carousel-container {
+  max-width: 1500px;
+  margin: 0 auto;
+}
+
+.carousel-item img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+
+.carousel-info {
+  padding: 1rem;
+  background-color: rgba(248, 249, 250, 1); /* Fond gris clair */
+  color: #555;
+  text-align: left;
+}
+
+/* Sur desktop : texte sur l'image */
+@media (min-width: 768px) {
+  .carousel-info {
+    position: absolute;
+    bottom: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.6); /* Fond semi-transparent */
+    color: #fff;
+    max-width: 80%;
+    border-radius: 0.5rem;
+    text-align: center;
+  }
+}
+
+/* Sur mobile : texte sous l'image et prend toute la largeur */
+@media (max-width: 768px) {
+  .carousel-info {
+    position: static;
+    transform: none;
+    width: 100%; /* Prend toute la largeur de l'écran */
+    margin-top: 0;
+    border-radius: 0;
+  }
+
+  .carousel-info h5 {
+    font-size: 1.2rem; /* Réduit la taille du titre */
+  }
+
+  .carousel-info p {
+    font-size: 0.9rem; /* Réduit la taille du texte */
+  }
+
+  .carousel-info .btn {
+    font-size: 0.8rem; /* Réduit la taille du bouton */
+  }
+}
+
+.btn-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* Espace entre le bouton et l'icône de suppression */
+}
+
+.btn-sm {
+  font-size: 0.8rem; /* Réduit la taille des boutons */
+  padding: 0.25rem 0.5rem;
+}
+
+.message {
+  margin-top: 1rem;
+  text-align: center;
+  font-size: 1rem;
+  color: #555;
+  display: none; /* Masqué par défaut */
+}
+
+/* ************carousel acteur********************** */
+
+/* Conteneur principal du carrousel */
+.carousel-netflix {
+  position: relative;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  margin: 0 auto;
+  max-width: 1500px; /* Largeur maximale du carrousel */
+}
+
+/* Boutons de navigation */
+.carousel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(0, 0, 0, 0.5);
+  border: none;
+  color: white;
+  font-size: 2rem;
+  cursor: pointer;
+  z-index: 10;
+  padding: 10px;
+  border-radius: 50%;
+}
+
+.carousel-btn.prev {
+  left: 30px; /* Positionner la flèche gauche à l'extérieur */
+}
+
+.carousel-btn.next {
+  right: 30px; /* Positionner la flèche droite à l'extérieur */
+}
+
+/* Conteneur des éléments */
+.carousel-track-container {
+  overflow: hidden;
+  width: 100%; /* Assure que seules les images visibles sont affichées */
+}
+
+.carousel-track {
+  display: flex;
+  transition: transform 0.5s ease-in-out;
+  padding: 0; /* Supprimer tout espace interne */
+  margin: 0; /* Supprimer tout espace externe */
+}
+
+/* Élément du carrousel */
+.carousel-track li {
+  list-style: none;
+  flex: 0 0 calc(100% / 6); /* Par défaut : 6 images visibles */
+  max-width: calc(100% / 6);
+  text-align: center;
+}
+
+/* Images des acteurs */
+.carousel-track img {
+  width: 100%; /* Prend toute la largeur de l'élément */
+  height: 300px; /* Hauteur fixe pour toutes les images */
+  object-fit: contain; /* Ajuster l'image pour remplir le conteneur */
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Texte sous les images */
+.carousel-track p {
+  margin-top: 10px;
+  font-size: 0.9rem;
+  color: #fff;
+}
+
+/* Responsive : 1 image visible sur les petits écrans */
+@media (max-width: 768px) {
+  .carousel-track li {
+    flex: 0 0 100%; /* Une seule image visible */
+    max-width: 100%;
+  }
+
+  .carousel-track img {
+    height: 200px; /* Ajuster la hauteur pour les petits écrans */
+  }
+}
+/* ************ fin carousel acteur********************** */
