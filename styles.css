@@ -212,86 +212,76 @@ h1 {
 }
 
 /* ************carousel acteur********************** */
-
-/* Conteneur principal du carrousel */
-.carousel-netflix {
-  position: relative;
+/* Swiper acteurs populaires */
+/* Swiper acteurs populaires */
+.actor-card {
+  background: #fff;
+  border-radius: 22px;
+  padding: 18px 10px 12px 10px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1);
   display: flex;
+  flex-direction: column;
   align-items: center;
-  overflow: hidden;
-  margin: 0 auto;
-  max-width: 1500px; /* Largeur maximale du carrousel */
+  width: 220px;
+  margin: auto;
+  position: relative;
 }
 
-/* Boutons de navigation */
-.carousel-btn {
+.actor-img {
+  width: 180px;
+  height: 240px;
+  object-fit: cover;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.13);
+  background: #fff;
+  margin-bottom: 10px;
+}
+
+.actor-name {
+  color: #a259ff;
+  font-size: 1.1rem;
+  margin-top: -8px;
+  font-weight: bold;
+  z-index: 2;
+  background: transparent;
+}
+
+/* Flèches Swiper violettes */
+.swiper-actors-wrapper .swiper-button-prev,
+.swiper-actors-wrapper .swiper-button-next {
+  color: #fff;
+  background: #6a0dad;
+  border-radius: 50%;
+  width: 56px;
+  height: 56px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background-color: rgba(0, 0, 0, 0.5);
-  border: none;
-  color: white;
-  font-size: 2rem;
-  cursor: pointer;
   z-index: 10;
-  padding: 10px;
-  border-radius: 50%;
 }
 
-.carousel-btn.prev {
-  left: 30px; /* Positionner la flèche gauche à l'extérieur */
+.swiper-actors-wrapper .swiper-button-prev {
+  left: -70px;
 }
 
-.carousel-btn.next {
-  right: 30px; /* Positionner la flèche droite à l'extérieur */
+.swiper-actors-wrapper .swiper-button-next {
+  right: -70px;
 }
 
-/* Conteneur des éléments */
-.carousel-track-container {
-  overflow: hidden;
-  width: 100%; /* Assure que seules les images visibles sont affichées */
+.swiper-actors-wrapper .swiper-button-prev:after,
+.swiper-actors-wrapper .swiper-button-next:after {
+  font-size: 2.2rem;
+  font-weight: bold;
 }
 
-.carousel-track {
-  display: flex;
-  transition: transform 0.5s ease-in-out;
-  padding: 0; /* Supprimer tout espace interne */
-  margin: 0; /* Supprimer tout espace externe */
-}
-
-/* Élément du carrousel */
-.carousel-track li {
-  list-style: none;
-  flex: 0 0 calc(100% / 6); /* Par défaut : 6 images visibles */
-  max-width: calc(100% / 6);
-  text-align: center;
-}
-
-/* Images des acteurs */
-.carousel-track img {
-  width: 100%; /* Prend toute la largeur de l'élément */
-  height: 300px; /* Hauteur fixe pour toutes les images */
-  object-fit: contain; /* Ajuster l'image pour remplir le conteneur */
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-/* Texte sous les images */
-.carousel-track p {
-  margin-top: 10px;
-  font-size: 0.9rem;
-  color: #fff;
-}
-
-/* Responsive : 1 image visible sur les petits écrans */
-@media (max-width: 768px) {
-  .carousel-track li {
-    flex: 0 0 100%; /* Une seule image visible */
-    max-width: 100%;
+/* Responsive pour les flèches */
+@media (max-width: 1199px) {
+  .swiper-actors-wrapper .swiper-button-prev {
+    left: 0;
   }
-
-  .carousel-track img {
-    height: 200px; /* Ajuster la hauteur pour les petits écrans */
+  .swiper-actors-wrapper .swiper-button-next {
+    right: 0;
   }
 }
 /* ************ fin carousel acteur********************** */

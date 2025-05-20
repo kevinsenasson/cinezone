@@ -2,7 +2,6 @@ const apiKey = "c60699cfb590fac613bd4224390bd432";
 const maListe = [];
 let genreMap = {};
 
-
 // Charger les genres
 async function chargerGenres() {
   const url = `https://api.themoviedb.org/3/genre/movie/list?api_key=${apiKey}&language=fr-FR`;
@@ -15,16 +14,14 @@ async function chargerGenres() {
   }, {});
 }
 
-
+// Recherche de films
 async function rechercherFilms(query, cibleSuggestions = "suggestions") {
   const suggestions = document.getElementById(cibleSuggestions);
   suggestions.innerHTML = ""; // Réinitialiser les suggestions
 
   if (query.length < 1) return; // Ne pas rechercher si la saisie est vide
 
-  const url = `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&language=fr-FR&query=${encodeURIComponent(
-    query
-  )}`;
+  const url = `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&language=fr-FR&query=${encodeURIComponent(query)}`;
   const response = await fetch(url);
   const data = await response.json();
 
@@ -42,6 +39,7 @@ async function rechercherFilms(query, cibleSuggestions = "suggestions") {
   });
 }
 
+// Gestion des suggestions (fermeture au clic extérieur)
 document.addEventListener("click", (e) => {
   // Suggestions principales
   const searchInput = document.getElementById("searchInput");
@@ -70,6 +68,7 @@ document.addEventListener("click", (e) => {
   }
 });
 
+// Affichage des détails d'un film dans la modal
 async function afficherDetailsFilm(film) {
   try {
     // Récupérer les détails des acteurs via l'API TMDB
@@ -115,7 +114,6 @@ async function afficherDetailsFilm(film) {
     } else {
       actorsList.innerHTML = "<p>Aucun acteur trouvé</p>";
     }
-    
 
     // Afficher la modal
     const modal = new bootstrap.Modal(document.getElementById("filmDetailsModal"));
@@ -124,7 +122,6 @@ async function afficherDetailsFilm(film) {
     console.error("Erreur lors de l'affichage des détails du film :", error);
   }
 }
-
 
 // Ajouter un gestionnaire d'événements pour les films du carrousel
 document.getElementById("carouselInner").addEventListener("click", (event) => {
@@ -235,125 +232,65 @@ function supprimerDeLaListe(titreFilm, deleteButton) {
   }
 }
 
-async function chargerActeursPopulaires() {
-  try {
-    const url = `https://api.themoviedb.org/3/person/popular?api_key=${apiKey}&language=fr-FR&page=1`;
-    const response = await fetch(url);
-    const data = await response.json();
-
-    const carouselTrack = document.getElementById("carouselActorsTrack");
-    carouselTrack.innerHTML = ""; // Réinitialiser le contenu
-
-    // Ajouter chaque acteur au carrousel
-    data.results.forEach((acteur) => {
-      const li = document.createElement("li");
-
-      const actorImg = document.createElement("img");
-      actorImg.src = acteur.profile_path
-        ? `https://image.tmdb.org/t/p/w200${acteur.profile_path}`
-        : "https://via.placeholder.com/200x300?text=Image+non+disponible";
-      actorImg.alt = acteur.name;
-
-      const actorName = document.createElement("p");
-      actorName.textContent = acteur.name;
-
-      li.appendChild(actorImg);
-      li.appendChild(actorName);
-      carouselTrack.appendChild(li);
-    });
-
-    // Initialiser le carrousel
-    initialiserCarouselNetflix();
-  } catch (error) {
-    console.error("Erreur lors du chargement des acteurs populaires :", error);
-  }
-}
-
-function initialiserCarouselNetflix() {
-  const track = document.getElementById("carouselActorsTrack");
-  const prevButton = document.getElementById("prevActors");
-  const nextButton = document.getElementById("nextActors");
-  const items = track.querySelectorAll("li");
-
-  // Fonction pour recalculer la largeur des éléments
-  function updateItemWidth() {
-    const containerWidth = track.parentElement.offsetWidth; // Largeur du conteneur visible
-    const isMobile = window.innerWidth <= 768;
-    const visibleItems = isMobile ? 1 : 6; // 1 image sur mobile, 6 sur desktop
-    const itemWidth = containerWidth / visibleItems;
-  
-    items.forEach((item) => {
-      item.style.flex = `0 0 ${itemWidth}px`;
-      item.style.maxWidth = `${itemWidth}px`;
-      item.style.textAlign = "center"; // Centrer le contenu des éléments
-    });
-  
-    return { itemWidth, visibleItems };
-  }
-
-  let { itemWidth, visibleItems } = updateItemWidth();
-  let currentPosition = visibleItems * itemWidth;
-
-  // Dupliquer les premiers et derniers éléments pour un effet infini
-  for (let i = 0; i < visibleItems; i++) {
-    const firstClone = items[i].cloneNode(true);
-    const lastClone = items[items.length - 1 - i].cloneNode(true);
-    track.appendChild(firstClone); // Ajouter les clones à la fin
-    track.insertBefore(lastClone, track.firstChild); // Ajouter les clones au début
-  }
-
-  // Ajuster la position initiale pour compenser les clones
-  track.style.transform = `translateX(-${currentPosition}px)`;
-
-  // Gérer le clic sur le bouton "Suivant"
-  nextButton.addEventListener("click", () => {
-    currentPosition += itemWidth;
-    track.style.transition = "transform 0.5s ease-in-out";
-    track.style.transform = `translateX(-${currentPosition}px)`;
-
-    // Réinitialiser la position pour un effet infini
-    if (currentPosition >= (items.length + visibleItems) * itemWidth) {
-      currentPosition = visibleItems * itemWidth;
-      setTimeout(() => {
-        track.style.transition = "none";
-        track.style.transform = `translateX(-${currentPosition}px)`;
-      }, 500); // Attendre la fin de la transition
-    }
-  });
-
-  // Gérer le clic sur le bouton "Précédent"
-  prevButton.addEventListener("click", () => {
-    currentPosition -= itemWidth;
-    track.style.transition = "transform 0.5s ease-in-out";
-    track.style.transform = `translateX(-${currentPosition}px)`;
-
-    // Réinitialiser la position pour un effet infini
-    if (currentPosition <= 0) {
-      currentPosition = items.length * itemWidth;
-      setTimeout(() => {
-        track.style.transition = "none";
-        track.style.transform = `translateX(-${currentPosition}px)`;
-      }, 500); // Attendre la fin de la transition
-    }
-  });
-
-  // Recalculer la largeur des éléments lors du redimensionnement de la fenêtre
-  window.addEventListener("resize", () => {
-    const updatedValues = updateItemWidth();
-    itemWidth = updatedValues.itemWidth;
-    visibleItems = updatedValues.visibleItems;
-    currentPosition = visibleItems * itemWidth;
-    track.style.transition = "none";
-    track.style.transform = `translateX(-${currentPosition}px)`;
-  });
-}
-
-// Charger les acteurs populaires au chargement de la page
-document.addEventListener("DOMContentLoaded", () => {
-  chargerActeursPopulaires();
-});
-
+// Initialisation au chargement de la page
 window.addEventListener("DOMContentLoaded", async () => {
   await chargerGenres();
   await chargerFilmsTendances();
 });
+
+// ***********************carousel acteurs***********************
+async function chargerActeursPopulaires() {
+  const apiKey = "c60699cfb590fac613bd4224390bd432";
+  const url = `https://api.themoviedb.org/3/person/popular?api_key=${apiKey}&language=fr-FR&page=1`;
+  const response = await fetch(url);
+  const data = await response.json();
+  const wrapper = document.getElementById('swiperActorsWrapper');
+  wrapper.innerHTML = "";
+
+  data.results.forEach(acteur => {
+    wrapper.innerHTML += `
+      <div class="swiper-slide text-center">
+        <img 
+          src="${acteur.profile_path ? 'https://image.tmdb.org/t/p/w300' + acteur.profile_path : 'https://via.placeholder.com/220x320?text=No+Image'}"
+          alt="${acteur.name}" 
+          style="width:220px;height:320px;object-fit:cover;border-radius:18px;box-shadow:0 6px 24px rgba(0,0,0,0.22);margin:auto;display:block;"
+          class="mb-2"
+        >
+        <div class="fw-bold">${acteur.name}</div>
+      </div>
+    `;
+  });
+
+  // Initialise Swiper après avoir injecté les slides
+  new Swiper('#swiper-actors', {
+    navigation: {
+      nextEl: '.swiper-button-next',
+      prevEl: '.swiper-button-prev'
+    },
+    loop: true,
+    speed: 500,
+    slidesPerGroup: 1,
+    effect: 'coverflow',
+    coverflowEffect: {
+    rotate: 10,
+    stretch: -20,
+    depth: 50,
+    modifier: 1,
+    slideShadows: false,
+    },
+    breakpoints: {
+      0:   { slidesPerView: 1, spaceBetween: 16 },
+      620: { slidesPerView: 2, spaceBetween: 16 },
+      768: { slidesPerView: 3, spaceBetween: 24 },
+      1200:{ slidesPerView: 5, spaceBetween: 32 }
+    }
+  });
+}
+
+// Appelle la fonction au chargement de la page
+window.addEventListener("DOMContentLoaded", async () => {
+  await chargerGenres();
+  await chargerFilmsTendances();
+  await chargerActeursPopulaires();
+});
+// *********************** fin carousel acteurs***********************
