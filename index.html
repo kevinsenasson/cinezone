@@ -51,30 +51,6 @@
           class="col-12 col-md-3 d-flex gap-2 justify-content-center justify-content-md-end"
         >
           <button class="btn btn-primary">Connecter</button>
-
-          <div class="dropdown">
-            <button
-              class="btn btn-primary dropdown-toggle"
-              type="button"
-              id="dropdownMenuButton"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
-            >
-              Trier
-            </button>
-            <ul
-              class="dropdown-menu dropdown-menu-end"
-              aria-labelledby="dropdownMenuButton"
-            >
-              <li><a class="dropdown-item" href="#">Film</a></li>
-              <li><a class="dropdown-item" href="#">Série</a></li>
-              <li><a class="dropdown-item" href="#">Anime</a></li>
-              <li><a class="dropdown-item" href="#">Documentaire</a></li>
-              <li><a class="dropdown-item" href="#">Mini-série</a></li>
-              <li><a class="dropdown-item" href="#">Acteur</a></li>
-              <li><a class="dropdown-item" href="#">Réalisateur</a></li>
-            </ul>
-          </div>
         </div>
       </div>
     </header>
@@ -287,6 +263,49 @@
       <div class="offcanvas-body" id="contenuDetailFilm"></div>
     </div>
     <!-- fin Offcanvas détails film (par-dessus, à gauche) -->
+
+    <hr />
+
+    <!-- ================== Filtres Type & Genre ================== -->
+    <div class="container my-4">
+      <!-- Filtres Type -->
+      <div class="d-flex justify-content-center gap-3 mb-3 flex-wrap">
+        <button class="btn btn-primary type-btn active" data-type="movie">
+          Films
+        </button>
+        <button class="btn btn-outline-primary type-btn" data-type="tv">
+          Séries
+        </button>
+        <button class="btn btn-outline-primary type-btn" data-type="tvshow">
+          Émissions TV
+        </button>
+        <button class="btn btn-outline-primary type-btn" data-type="person">
+          Acteurs
+        </button>
+      </div>
+      <!-- Filtres Genre -->
+      <div
+        class="d-flex justify-content-center gap-2 mb-4 flex-wrap"
+        id="genreFilters"
+      >
+        <button class="btn btn-secondary genre-btn active" data-genre="all">
+          Tout
+        </button>
+        <!-- Les genres seront générés dynamiquement -->
+      </div>
+    </div>
+
+    <!-- ================== Zone d'affichage des résultats ================== -->
+    <div class="container">
+      <div class="row" id="resultatsCartes">
+        <!-- Les cards (films, séries, émissions, acteurs) seront générées ici par JS -->
+      </div>
+      <div class="text-center my-4">
+        <button id="btnChargerPlus" class="btn btn-outline-primary w-100">
+          Charger plus
+        </button>
+      </div>
+    </div>
 
     <!-- Bootstrap JS -->
     <script

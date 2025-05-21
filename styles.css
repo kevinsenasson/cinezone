@@ -495,3 +495,137 @@ h2 {
   filter: invert(1);
 }
 /* ************  fin offcanva acteur tout les film au dessu a gauche  ********************** */
+
+/* Filtres */
+/* Boutons filtres type & genre */
+.type-btn,
+.genre-btn {
+  min-width: 110px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  border: 2px solid #6a0dad;
+  background: transparent;
+  color: #6a0dad;
+  transition: box-shadow 0.2s, background 0.2s, color 0.2s;
+  box-shadow: none;
+  opacity: 1 !important; /* Toujours bien visibles */
+}
+
+.type-btn.active,
+.genre-btn.active {
+  background: #6a0dad !important;
+  color: #ffffff !important; /* Texte noir */
+  border: 2px solid #fff;
+  box-shadow: 0 2px 12px rgba(106, 13, 173, 0.12);
+}
+
+.type-btn:not(.active):hover,
+.genre-btn:not(.active):hover {
+  background: #f3e6fa;
+  color: #6a0dad;
+  border-color: #6a0dad;
+  opacity: 1 !important;
+}
+#genreFilters {
+  flex-wrap: wrap;
+}
+.genre-btn {
+  margin-bottom: 6px;
+}
+
+/* ******** Cards des film,série,émissionTV, acteur */
+#resultatsCartes .card {
+  background: #222;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.13);
+  transition: transform 0.18s;
+}
+
+#resultatsCartes .card,
+#resultatsCartes .card-img-top {
+  width: 400px;
+  max-width: 100%;
+}
+
+#resultatsCartes .card-body {
+  width: 100%;
+  padding: 0.5rem 1rem 1rem 1rem;
+}
+#resultatsCartes .card:hover {
+  transform: translateY(-6px) scale(1.03);
+  box-shadow: 0 8px 24px rgba(106, 13, 173, 0.13);
+}
+#resultatsCartes .card-img-top {
+  height: 600px; /* Ratio 2:3 */
+  object-fit: cover;
+  background: #eee;
+  border-radius: 12px 12px 0 0;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#resultatsCartes .card {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ****pour changer la couleur des note dans les card **** */
+.bg-violet {
+  background: #6a0dad !important;
+  color: #fff !important;
+}
+/* **** fin pour changer la couleur des note dans les card **** */
+
+#btnChargerPlus {
+  background: #6a0dad !important;
+  color: #fff !important;
+  border: none;
+  font-weight: 600;
+  width: 100%;
+  transition: background 0.2s, color 0.2s, border 0.2s;
+}
+
+@media (max-width: 1200px) {
+  #resultatsCartes .card,
+  #resultatsCartes .card-img-top {
+    max-width: 320px;
+  }
+  #resultatsCartes .card-img-top {
+    height: 480px;
+  }
+}
+
+@media (max-width: 900px) {
+  #resultatsCartes .card,
+  #resultatsCartes .card-img-top {
+    max-width: 260px;
+  }
+  #resultatsCartes .card-img-top {
+    height: 390px;
+  }
+}
+
+@media (max-width: 600px) {
+  #resultatsCartes .card,
+  #resultatsCartes .card-img-top {
+    max-width: 90vw;
+  }
+  #resultatsCartes .card-img-top {
+    height: 55vw; /* Ratio mobile, ajuste si besoin */
+    min-height: 180px;
+  }
+}
+
+@media (max-width: 599px) {
+  #resultatsCartes .card,
+  #resultatsCartes .card-img-top {
+    max-width: 90vw;
+  }
+  #resultatsCartes .card-img-top {
+    height: 125vw; /* Garde un ratio harmonieux, ajuste si besoin */
+    min-height: 120px;
+  }
+}

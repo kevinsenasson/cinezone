@@ -76,28 +76,55 @@ document.getElementById('searchBar').addEventListener('input', async function() 
     suggestions.innerHTML = '';
     return;
   }
-  // Recherche d'acteurs
-  const url = `https://api.themoviedb.org/3/search/person?api_key=${apiKey}&language=fr-FR&query=${encodeURIComponent(query)}`;
-  const response = await fetch(url);
-  const data = await response.json();
+
+  // Lancer les deux recherches en parallèle
+  const [filmsRes, acteursRes] = await Promise.all([
+    fetch(`https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&language=fr-FR&query=${encodeURIComponent(query)}`).then(r => r.json()),
+    fetch(`https://api.themoviedb.org/3/search/person?api_key=${apiKey}&language=fr-FR&query=${encodeURIComponent(query)}`).then(r => r.json())
+  ]);
+
   suggestions.innerHTML = '';
-  (data.results || []).slice(0, 5).forEach(acteur => {
-    const li = document.createElement('li');
-    li.className = 'list-group-item d-flex align-items-center';
-    li.style.cursor = 'pointer';
-    li.innerHTML = `
-      <img src="${acteur.profile_path ? 'https://image.tmdb.org/t/p/w45' + acteur.profile_path : 'https://via.placeholder.com/45x60?text=No+Image'}" style="width:32px;height:45px;object-fit:cover;border-radius:4px;margin-right:8px;">
-      <span>${acteur.name}</span>
-    `;
-    li.addEventListener('click', () => {
-      suggestions.innerHTML = '';
-      document.getElementById('searchBar').value = acteur.name;
-      afficherDetailsActeur(acteur.id);
-    });
-    suggestions.appendChild(li);
+
+// Afficher les films trouvés
+(filmsRes.results || []).slice(0, 5).forEach(film => {
+  const li = document.createElement('li');
+  li.className = 'list-group-item d-flex align-items-center';
+  li.style.cursor = 'pointer';
+  li.innerHTML = `
+    ${film.poster_path ? `<img src="https://image.tmdb.org/t/p/w45${film.poster_path}" style="width:32px;height:45px;object-fit:cover;border-radius:4px;margin-right:8px;">` : ''}
+    <span>${film.title}</span>
+    <span class="badge bg-primary ms-auto">Film</span>
+  `;
+  li.addEventListener('click', () => {
+    suggestions.innerHTML = '';
+    afficherDetailsFilm(film);
   });
+  suggestions.appendChild(li);
 });
 
+// Afficher les acteurs trouvés
+(acteursRes.results || []).slice(0, 5).forEach(acteur => {
+  const li = document.createElement('li');
+  li.className = 'list-group-item d-flex align-items-center';
+  li.style.cursor = 'pointer';
+  li.innerHTML = `
+    ${acteur.profile_path ? `<img src="https://image.tmdb.org/t/p/w45${acteur.profile_path}" style="width:32px;height:45px;object-fit:cover;border-radius:4px;margin-right:8px;">` : ''}
+    <span>${acteur.name}</span>
+    <span class="badge bg-success ms-auto">Acteur</span>
+  `;
+  li.addEventListener('click', () => {
+    suggestions.innerHTML = '';
+    document.getElementById('searchBar').value = acteur.name;
+    afficherDetailsActeur(acteur.id);
+  });
+  suggestions.appendChild(li);
+});
+
+  // Si aucun résultat
+  if (suggestions.innerHTML === '') {
+    suggestions.innerHTML = `<li class="list-group-item">Aucun résultat trouvé</li>`;
+  }
+});
 // Entrée clavier pour sélectionner le premier résultat
 document.getElementById('searchBar').addEventListener('keydown', function(e) {
   const suggestions = document.getElementById('suggestions');
@@ -509,3 +536,241 @@ window.addEventListener("DOMContentLoaded", async () => {
 });
 
 // *********************** fin carousel acteurs + offcanvas acteur*************************
+
+// ================== GENRES ==================
+const genresMovie = [
+  { id: "all", name: "Tout" },
+  { id: 28, name: "Action" },
+  { id: 35, name: "Comédie" },
+  { id: 18, name: "Drame" },
+  { id: 16, name: "Animation" },
+  { id: 27, name: "Horreur" },
+  { id: 10749, name: "Romance" },
+  { id: 12, name: "Aventure" },
+  { id: 53, name: "Thriller" }
+];
+const genresTV = [
+  { id: "all", name: "Tout" },
+  { id: 10759, name: "Action & Aventure" },
+  { id: 35, name: "Comédie" },
+  { id: 18, name: "Drame" },
+  { id: 16, name: "Animation" },
+  { id: 10762, name: "Enfants" },
+  { id: 9648, name: "Mystère" },
+  { id: 10765, name: "Science-Fiction & Fantastique" }
+];
+const genresTVShow = [
+  { id: "all", name: "Tout" },
+  { id: 10764, name: "Émission TV" },
+  { id: 10767, name: "Talk" },
+  { id: 99, name: "Documentaire" }
+];
+
+// ================== INIT ==================
+let currentType = "movie";
+let currentGenre = "all";
+
+document.addEventListener("DOMContentLoaded", () => {
+  renderGenres();
+  fetchAndDisplay();
+});
+
+// ================== RENDU DES GENRES ==================
+function renderGenres() {
+  const genreFilters = document.getElementById("genreFilters");
+  genreFilters.innerHTML = "";
+  let genres = [];
+  if (currentType === "movie") genres = genresMovie;
+  else if (currentType === "tv") genres = genresTV;
+  else if (currentType === "tvshow") genres = genresTVShow;
+  // Pas de genre pour les acteurs
+  if (currentType === "person") {
+    genreFilters.innerHTML = "";
+    return;
+  }
+  genres.forEach(g => {
+    const btn = document.createElement("button");
+    btn.className = "btn genre-btn " + (g.id === "all" ? "btn-secondary active" : "btn-outline-secondary");
+    btn.textContent = g.name;
+    btn.dataset.genre = g.id;
+    btn.onclick = () => {
+      document.querySelectorAll(".genre-btn").forEach(b => b.classList.remove("active", "btn-secondary"));
+      btn.classList.add("active", "btn-secondary");
+      btn.classList.remove("btn-outline-secondary");
+      currentGenre = g.id;
+      fetchAndDisplay();
+    };
+    genreFilters.appendChild(btn);
+  });
+}
+
+// ================== RENDU DES TYPES ==================
+document.querySelectorAll(".type-btn").forEach(btn => {
+  btn.addEventListener("click", function() {
+    document.querySelectorAll(".type-btn").forEach(b => b.classList.remove("active", "btn-primary"));
+    this.classList.add("active", "btn-primary");
+    this.classList.remove("btn-outline-primary");
+    currentType = this.dataset.type;
+    currentGenre = "all";
+    renderGenres();
+    fetchAndDisplay();
+  });
+});
+
+// ================== FETCH & DISPLAY ==================
+async function fetchAndDisplay(append = false) {
+  const container = document.getElementById("resultatsCartes");
+  if (!append) container.innerHTML = '<div class="text-center my-5 w-100"><div class="spinner-border text-primary"></div></div>';
+  let url = "";
+  let results = [];
+  let data = {};
+  if (currentType === "movie") {
+    url = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&language=fr-FR&sort_by=popularity.desc&page=${currentPage}${currentGenre !== "all" ? "&with_genres=" + currentGenre : ""}`;
+    data = await fetch(url).then(r => r.json());
+    results = data.results;
+    totalPages = data.total_pages;
+    displayMovies(results, container, append);
+  } else if (currentType === "tv" || currentType === "tvshow") {
+    url = `https://api.themoviedb.org/3/discover/tv?api_key=${apiKey}&language=fr-FR&sort_by=popularity.desc&page=${currentPage}${currentGenre !== "all" ? "&with_genres=" + currentGenre : ""}`;
+    data = await fetch(url).then(r => r.json());
+    results = data.results;
+    totalPages = data.total_pages;
+    displayTV(results, container, append);
+  } else if (currentType === "person") {
+    url = `https://api.themoviedb.org/3/person/popular?api_key=${apiKey}&language=fr-FR&page=${currentPage}`;
+    data = await fetch(url).then(r => r.json());
+    results = data.results;
+    totalPages = data.total_pages;
+    displayActors(results, container, append);
+  }
+  document.getElementById("btnChargerPlus").style.display = (currentPage < totalPages) ? "inline-block" : "none";
+}
+
+// ================== AFFICHAGE DES CARDS ==================
+function displayMovies(movies, container) {
+  if (!movies.length) {
+    container.innerHTML = "<div class='text-center my-5 w-100'>Aucun film trouvé.</div>";
+    return;
+  }
+  container.innerHTML = "";
+  movies.forEach(film => {
+    container.innerHTML += `
+      <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
+        <div class="card h-100">
+          <img src="${film.poster_path ? "https://image.tmdb.org/t/p/w500" + film.poster_path : "https://via.placeholder.com/500x750?text=No+Image"}" class="card-img-top" alt="${film.title}">
+          <div class="card-body">
+            <h5 class="card-title" title="${film.title}">${film.title}</h5>
+            <p class="card-text">
+              <span class="badge bg-warning text-dark"><i class="bi bi-star-fill"></i> ${film.vote_average ? film.vote_average.toFixed(1) : "N/A"} / 10</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+}
+
+function displayTV(series, container) {
+  if (!series.length) {
+    container.innerHTML = "<div class='text-center my-5 w-100'>Aucune série trouvée.</div>";
+    return;
+  }
+  container.innerHTML = "";
+  series.forEach(serie => {
+    container.innerHTML += `
+      <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
+        <div class="card h-100">
+          <img src="${serie.poster_path ? "https://image.tmdb.org/t/p/w500" + serie.poster_path : "https://via.placeholder.com/500x750?text=No+Image"}" class="card-img-top" alt="${serie.name}">
+          <div class="card-body">
+            <h5 class="card-title" title="${serie.name}">${serie.name}</h5>
+            <p class="card-text">
+              <span class="badge bg-warning text-dark"><i class="bi bi-star-fill"></i> ${serie.vote_average ? serie.vote_average.toFixed(1) : "N/A"} / 10</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+}
+
+function displayActors(actors, container) {
+  if (!actors.length) {
+    container.innerHTML = "<div class='text-center my-5 w-100'>Aucun acteur trouvé.</div>";
+    return;
+  }
+  container.innerHTML = "";
+  actors.forEach(acteur => {
+    container.innerHTML += `
+      <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
+        <div class="card h-100 text-center">
+          <img src="${acteur.profile_path ? "https://image.tmdb.org/t/p/w500" + acteur.profile_path : "https://via.placeholder.com/500x750?text=No+Image"}" class="card-img-top" alt="${acteur.name}">
+          <div class="card-body">
+            <h5 class="card-title" title="${acteur.name}">${acteur.name}</h5>
+            <p class="card-text">
+              <span class="badge bg-primary">Acteur</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+}
+
+let currentPage = 1;
+let totalPages = 1;
+
+// Modifie fetchAndDisplay pour gérer la pagination
+async function fetchAndDisplay(append = false) {
+  const container = document.getElementById("resultatsCartes");
+  if (!append) container.innerHTML = '<div class="text-center my-5 w-100"><div class="spinner-border text-primary"></div></div>';
+  let url = "";
+  let results = [];
+  if (currentType === "movie") {
+    url = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&language=fr-FR&sort_by=popularity.desc&page=${currentPage}${currentGenre !== "all" ? "&with_genres=" + currentGenre : ""}`;
+    const data = await fetch(url).then(r => r.json());
+    results = data.results;
+    totalPages = data.total_pages;
+    displayMovies(results, container, append);
+  }
+  // ... (idem pour séries)
+  document.getElementById("btnChargerPlus").style.display = (currentPage < totalPages) ? "inline-block" : "none";
+}
+
+// Modifie displayMovies pour append si besoin
+function displayMovies(movies, container, append = false) {
+  if (!append) container.innerHTML = "";
+  movies.forEach(film => {
+    const col = document.createElement("div");
+    col.className = "col-12 col-md-6 col-lg-4 mb-4";
+    const card = document.createElement("div");
+    card.className = "card h-100";
+    card.style.cursor = "pointer";
+    card.innerHTML = `
+      <img src="${film.poster_path ? "https://image.tmdb.org/t/p/w500" + film.poster_path : "https://via.placeholder.com/500x750?text=No+Image"}" class="card-img-top" alt="${film.title}">
+      <div class="card-body">
+        <h5 class="card-title" title="${film.title}">${film.title}</h5>
+        <p class="card-text">
+          <span class="badge bg-violet text-white"><i class="bi bi-star-fill"></i> ${film.vote_average ? film.vote_average.toFixed(1) : "N/A"} / 10</span>
+        </p>
+      </div>
+    `;
+    // Ajoute le click pour ouvrir le modal
+    card.addEventListener("click", () => afficherDetailsFilm(film));
+    col.appendChild(card);
+    container.appendChild(col);
+  });
+}
+
+// Gestion du bouton "Charger plus"
+document.getElementById("btnChargerPlus").addEventListener("click", () => {
+  currentPage++;
+  fetchAndDisplay(true);
+});
+
+// Remets la page à 1 à chaque changement de filtre/type
+function resetAndFetch() {
+  currentPage = 1;
+  fetchAndDisplay();
+}
+// Appelle resetAndFetch() au lieu de fetchAndDisplay() dans tes listeners de filtres/types.
+
