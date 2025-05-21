@@ -68,6 +68,45 @@ document.addEventListener("click", (e) => {
   }
 });
 
+// Recherche d'acteurs dans la barre de recherche
+document.getElementById('searchBar').addEventListener('input', async function() {
+  const query = this.value.trim();
+  const suggestions = document.getElementById('suggestions');
+  if (query.length < 2) {
+    suggestions.innerHTML = '';
+    return;
+  }
+  // Recherche d'acteurs
+  const url = `https://api.themoviedb.org/3/search/person?api_key=${apiKey}&language=fr-FR&query=${encodeURIComponent(query)}`;
+  const response = await fetch(url);
+  const data = await response.json();
+  suggestions.innerHTML = '';
+  (data.results || []).slice(0, 5).forEach(acteur => {
+    const li = document.createElement('li');
+    li.className = 'list-group-item d-flex align-items-center';
+    li.style.cursor = 'pointer';
+    li.innerHTML = `
+      <img src="${acteur.profile_path ? 'https://image.tmdb.org/t/p/w45' + acteur.profile_path : 'https://via.placeholder.com/45x60?text=No+Image'}" style="width:32px;height:45px;object-fit:cover;border-radius:4px;margin-right:8px;">
+      <span>${acteur.name}</span>
+    `;
+    li.addEventListener('click', () => {
+      suggestions.innerHTML = '';
+      document.getElementById('searchBar').value = acteur.name;
+      afficherDetailsActeur(acteur.id);
+    });
+    suggestions.appendChild(li);
+  });
+});
+
+// Entrée clavier pour sélectionner le premier résultat
+document.getElementById('searchBar').addEventListener('keydown', function(e) {
+  const suggestions = document.getElementById('suggestions');
+  if (e.key === 'Enter' && suggestions.firstChild) {
+    e.preventDefault();
+    suggestions.firstChild.click();
+  }
+});
+
 // Affichage des détails d'un film dans la modal
 async function afficherDetailsFilm(film) {
   try {
@@ -75,6 +114,8 @@ async function afficherDetailsFilm(film) {
     const urlCredits = `https://api.themoviedb.org/3/movie/${film.id}/credits?api_key=${apiKey}&language=fr-FR`;
     const responseCredits = await fetch(urlCredits);
     const dataCredits = await responseCredits.json();
+
+    
 
     // Vérifier si les données du film sont disponibles
     document.getElementById("filmPoster").src = film.poster_path
@@ -238,9 +279,10 @@ window.addEventListener("DOMContentLoaded", async () => {
   await chargerFilmsTendances();
 });
 
-// ***********************carousel acteurs***********************
+// ***********************carousel acteurs + offcanvas acteur*************************
+
+// Charger les acteurs populaires dans le Swiper
 async function chargerActeursPopulaires() {
-  const apiKey = "c60699cfb590fac613bd4224390bd432";
   const url = `https://api.themoviedb.org/3/person/popular?api_key=${apiKey}&language=fr-FR&page=1`;
   const response = await fetch(url);
   const data = await response.json();
@@ -249,48 +291,221 @@ async function chargerActeursPopulaires() {
 
   data.results.forEach(acteur => {
     wrapper.innerHTML += `
-      <div class="swiper-slide text-center">
+      <div class="swiper-slide text-center" data-id="${acteur.id}">
         <img 
-          src="${acteur.profile_path ? 'https://image.tmdb.org/t/p/w300' + acteur.profile_path : 'https://via.placeholder.com/220x320?text=No+Image'}"
+          src="${acteur.profile_path ? 'https://image.tmdb.org/t/p/w300' + acteur.profile_path : 'https://via.placeholder.com/200x280?text=No+Image'}"
           alt="${acteur.name}" 
-          style="width:220px;height:320px;object-fit:cover;border-radius:18px;box-shadow:0 6px 24px rgba(0,0,0,0.22);margin:auto;display:block;"
-          class="mb-2"
+          class="actor-img"
         >
-        <div class="fw-bold">${acteur.name}</div>
+        <div class="actor-name">${acteur.name}</div>
       </div>
     `;
   });
 
-  // Initialise Swiper après avoir injecté les slides
+  // Initialisation Swiper
   new Swiper('#swiper-actors', {
-    navigation: {
-      nextEl: '.swiper-button-next',
-      prevEl: '.swiper-button-prev'
-    },
+    slidesPerView: 6,
+    spaceBetween: 2,
     loop: true,
-    speed: 500,
-    slidesPerGroup: 1,
-    effect: 'coverflow',
-    coverflowEffect: {
-    rotate: 10,
-    stretch: -20,
-    depth: 50,
-    modifier: 1,
-    slideShadows: false,
+    freeMode: true,
+    speed: 4000,
+    autoplay: {
+      delay: 0,
+      disableOnInteraction: false
     },
+    grabCursor: true,
     breakpoints: {
-      0:   { slidesPerView: 1, spaceBetween: 16 },
-      620: { slidesPerView: 2, spaceBetween: 16 },
-      768: { slidesPerView: 3, spaceBetween: 24 },
-      1200:{ slidesPerView: 5, spaceBetween: 32 }
+      0:   { slidesPerView: 2, spaceBetween: 1 },
+      768: { slidesPerView: 4, spaceBetween: 2 },
+      1200:{ slidesPerView: 6, spaceBetween: 2 }
     }
+  });
+
+  // Ajoute les événements click APRÈS avoir généré les slides
+  document.querySelectorAll('#swiperActorsWrapper .swiper-slide').forEach(slide => {
+    slide.addEventListener('click', async function() {
+      const acteurId = this.getAttribute('data-id');
+      await afficherDetailsActeur(acteurId);
+    });
   });
 }
 
-// Appelle la fonction au chargement de la page
+// Affiche la fiche acteur (offcanvas droite)
+async function afficherDetailsActeur(acteurId) {
+  // Récupère les infos de l'acteur
+  const url = `https://api.themoviedb.org/3/person/${acteurId}?api_key=${apiKey}&language=fr-FR`;
+  const response = await fetch(url);
+  const acteur = await response.json();
+
+  document.getElementById('offcanvasActeurLabel').textContent = acteur.name;
+  document.getElementById('acteurPhoto').src = acteur.profile_path ? 'https://image.tmdb.org/t/p/w300' + acteur.profile_path : 'https://via.placeholder.com/200x280?text=No+Image';
+  document.getElementById('acteurNaissance').textContent = acteur.birthday || "Inconnue";
+  document.getElementById('acteurAge').textContent = acteur.birthday ? calculerAge(acteur.birthday) + " ans" : "Inconnu";
+  document.getElementById('acteurBio').textContent = acteur.biography ? acteur.biography.substring(0, 350) + "..." : "Biographie non disponible.";
+
+  // Récupère les films
+  const urlFilms = `https://api.themoviedb.org/3/person/${acteurId}/movie_credits?api_key=${apiKey}&language=fr-FR`;
+  const responseFilms = await fetch(urlFilms);
+  const filmsData = await responseFilms.json();
+  const topFilms = (filmsData.cast || []).sort((a, b) => b.popularity - a.popularity).slice(0, 5);
+
+  const filmsDiv = document.getElementById('acteurFilms');
+  filmsDiv.innerHTML = "";
+  topFilms.forEach(film => {
+    filmsDiv.innerHTML += `
+      <div class="film-card film-detail" data-film-id="${film.id}">
+        <img src="${film.poster_path ? 'https://image.tmdb.org/t/p/w200' + film.poster_path : 'https://via.placeholder.com/140x200?text=No+Image'}" alt="${film.title}">
+        <div class="film-title" title="${film.title}">${film.title}</div>
+      </div>
+    `;
+  });
+
+  // Ajoute le bouton "Voir plus" si plus de 5 films
+  if (filmsData.cast && filmsData.cast.length > 5) {
+    filmsDiv.innerHTML += `
+      <div class="film-card voir-plus" onclick="ouvrirTousLesFilmsActeur(${acteurId}, '${acteur.name.replace(/'/g, "\\'")}')">
+        <div style="height:80%;display:flex;align-items:center;justify-content:center;">
+          <span>Voir plus</span>
+        </div>
+      </div>
+    `;
+  }
+
+  // Ajoute le click sur les 5 meilleurs films pour ouvrir l'offcanvas gauche avec détails
+  filmsDiv.querySelectorAll('.film-detail').forEach(card => {
+    card.addEventListener('click', async function() {
+      const filmId = this.getAttribute('data-film-id');
+      await ouvrirDetailsFilmOffcanvas(filmId);
+    });
+  });
+
+  // Ouvre l'offcanvas Bootstrap (droite)
+  const offcanvas = new bootstrap.Offcanvas(document.getElementById('offcanvasActeur'));
+  offcanvas.show();
+}
+
+// Ouvre l'offcanvas gauche avec tous les films de l'acteur
+async function ouvrirTousLesFilmsActeur(acteurId, acteurNom) {
+  const urlFilms = `https://api.themoviedb.org/3/person/${acteurId}/movie_credits?api_key=${apiKey}&language=fr-FR`;
+  const responseFilms = await fetch(urlFilms);
+  const filmsData = await responseFilms.json();
+
+  document.getElementById('offcanvasFilmsActeurLabel').textContent = `Tous les films de ${acteurNom}`;
+  const filmsDiv = document.getElementById('tousLesFilmsActeur');
+  filmsDiv.innerHTML = "";
+(filmsData.cast || [])
+  .sort((a, b) => b.popularity - a.popularity)
+  .forEach(film => {
+    filmsDiv.innerHTML += `
+      <div class="film-card film-detail-tous" data-film-id="${film.id}">
+        <img src="${film.poster_path ? 'https://image.tmdb.org/t/p/w200' + film.poster_path : 'https://via.placeholder.com/140x200?text=No+Image'}" alt="${film.title}">
+        <div class="film-title" title="${film.title}">${film.title}</div>
+      </div>
+    `;
+  });
+
+// Ajoute le click sur chaque film pour ouvrir le offcanvas détail (par-dessus)
+filmsDiv.querySelectorAll('.film-detail-tous').forEach(card => {
+  card.addEventListener('click', async function(e) {
+    e.stopPropagation();
+    const filmId = this.getAttribute('data-film-id');
+    await ouvrirDetailFilmOffcanvas(filmId);
+  });
+});
+
+  // Ouvre le offcanvas gauche
+  const offcanvas = new bootstrap.Offcanvas(document.getElementById('offcanvasFilmsActeur'));
+  offcanvas.show();
+}
+
+// Ouvre l'offcanvas gauche avec les détails d'un film
+async function ouvrirDetailsFilmOffcanvas(filmId) {
+  const url = `https://api.themoviedb.org/3/movie/${filmId}?api_key=${apiKey}&language=fr-FR`;
+  const response = await fetch(url);
+  const film = await response.json();
+
+  // Récupérer les crédits pour les acteurs principaux
+  const urlCredits = `https://api.themoviedb.org/3/movie/${filmId}/credits?api_key=${apiKey}&language=fr-FR`;
+  const responseCredits = await fetch(urlCredits);
+  const dataCredits = await responseCredits.json();
+
+  // Remplir l'offcanvas gauche avec les infos du film
+  document.getElementById('offcanvasFilmsActeurLabel').textContent = film.title || "Titre non disponible";
+  const filmsDiv = document.getElementById('tousLesFilmsActeur');
+  filmsDiv.innerHTML = `
+    <div class="text-center mb-3">
+      <img src="${film.poster_path ? 'https://image.tmdb.org/t/p/w500' + film.poster_path : 'https://via.placeholder.com/500x750?text=Image+non+disponible'}" alt="${film.title}" class="img-fluid rounded mb-3" style="max-height:350px;">
+      <h3>${film.title || "Titre non disponible"}</h3>
+      <p><strong>Note :</strong> ${film.vote_average ? film.vote_average.toFixed(1) : "N/A"} / 10 (${film.vote_count || 0} votes)</p>
+      <p>${film.overview || "Aucun synopsis disponible."}</p>
+      <h5>Acteurs principaux :</h5>
+      <div style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;">
+        ${
+          (dataCredits.cast || []).slice(0, 5).map(actor => `
+            <div style="text-align:center;">
+              <img src="${actor.profile_path ? 'https://image.tmdb.org/t/p/w200' + actor.profile_path : 'https://via.placeholder.com/90x130?text=No+Image'}" alt="${actor.name}" style="width:70px;height:100px;object-fit:cover;border-radius:8px;">
+              <div style="font-size:0.9rem;color:#fff;">${actor.name}</div>
+            </div>
+          `).join('')
+        }
+      </div>
+    </div>
+  `;
+
+  // Ouvre le offcanvas gauche
+  const offcanvas = new bootstrap.Offcanvas(document.getElementById('offcanvasFilmsActeur'));
+  offcanvas.show();
+}
+
+// Ouvre un offcanvas par-dessus avec les détails d'un film (depuis la liste complète)
+async function ouvrirDetailFilmOffcanvas(filmId) {
+  const url = `https://api.themoviedb.org/3/movie/${filmId}?api_key=${apiKey}&language=fr-FR`;
+  const response = await fetch(url);
+  const film = await response.json();
+
+  // Récupérer les crédits pour les acteurs principaux
+  const urlCredits = `https://api.themoviedb.org/3/movie/${filmId}/credits?api_key=${apiKey}&language=fr-FR`;
+  const responseCredits = await fetch(urlCredits);
+  const dataCredits = await responseCredits.json();
+
+  // Remplir le offcanvas détail (par-dessus)
+  document.getElementById('offcanvasDetailFilmLabel').textContent = film.title || "Titre non disponible";
+  document.getElementById('contenuDetailFilm').innerHTML = `
+    <div class="text-center mb-3">
+      <img src="${film.poster_path ? 'https://image.tmdb.org/t/p/w500' + film.poster_path : 'https://via.placeholder.com/500x750?text=Image+non+disponible'}" alt="${film.title}" class="img-fluid rounded mb-3" style="max-height:350px;">
+      <h3>${film.title || "Titre non disponible"}</h3>
+      <p><strong>Note :</strong> ${film.vote_average ? film.vote_average.toFixed(1) : "N/A"} / 10 (${film.vote_count || 0} votes)</p>
+      <p>${film.overview || "Aucun synopsis disponible."}</p>
+      <h5>Acteurs principaux :</h5>
+      <div style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;">
+        ${
+          (dataCredits.cast || []).slice(0, 5).map(actor => `
+            <div style="text-align:center;">
+              <img src="${actor.profile_path ? 'https://image.tmdb.org/t/p/w200' + actor.profile_path : 'https://via.placeholder.com/90x130?text=No+Image'}" alt="${actor.name}" style="width:70px;height:100px;object-fit:cover;border-radius:8px;">
+              <div style="font-size:0.9rem;color:#fff;">${actor.name}</div>
+            </div>
+          `).join('')
+        }
+      </div>
+    </div>
+  `;
+
+  // Ouvre le offcanvas détail (par-dessus)
+  const offcanvas = new bootstrap.Offcanvas(document.getElementById('offcanvasDetailFilm'));
+  offcanvas.show();
+}
+
+// Calculer l'âge à partir de la date de naissance
+function calculerAge(dateNaissance) {
+  const naissance = new Date(dateNaissance);
+  const diff = Date.now() - naissance.getTime();
+  const ageDate = new Date(diff);
+  return Math.abs(ageDate.getUTCFullYear() - 1970);
+}
+
+// Appel au chargement de la page
 window.addEventListener("DOMContentLoaded", async () => {
-  await chargerGenres();
-  await chargerFilmsTendances();
   await chargerActeursPopulaires();
 });
-// *********************** fin carousel acteurs***********************
+
+// *********************** fin carousel acteurs + offcanvas acteur*************************

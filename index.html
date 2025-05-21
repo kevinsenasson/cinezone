@@ -85,8 +85,8 @@
       <h1>Films Tendance</h1>
     </div>
 
-    <!-- Carrousel -->
-    <section class="container-fluid px-0">
+    <!-- ********************Carrousel film populaire***************************** -->
+    <section class="p-0 m-0" style="overflow-x: hidden">
       <div
         id="carouselFilms"
         class="carousel slide carousel-container"
@@ -119,24 +119,7 @@
 
     <!-- Message -->
     <div id="message" class="message"></div>
-
-    <hr />
-
-    <!-- ****************Carrousel des acteurs populaires********************** -->
-    <div class="container my-5">
-      <h2 class="mb-4 text-center">Acteurs Populaires</h2>
-      <div class="swiper-actors-wrapper" style="position: relative">
-        <div class="swiper" id="swiper-actors">
-          <div class="swiper-wrapper" id="swiperActorsWrapper">
-            <!-- Slides générés par JS -->
-          </div>
-        </div>
-        <!-- Flèches EN DEHORS du swiper -->
-        <div class="swiper-button-prev"></div>
-        <div class="swiper-button-next"></div>
-      </div>
-    </div>
-    <!-- **************** fin Carrousel des acteurs populaires********************** -->
+    <!--  ***************fin Carrousel film populaire********************* -->
 
     <!-- **************Modal pour les détails du film********************* -->
     <div
@@ -195,6 +178,116 @@
     </div>
     <!-- ************** fin Modal pour les détails du film********************* -->
 
+    <hr />
+
+    <!-- ****************Carrousel des acteurs populaires********************** -->
+    <!-- Swiper CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"
+    />
+
+    <div class="container-fluid my-5 px-4">
+      <h2 class="mb-4 text-center">Acteurs Populaires</h2>
+      <div class="swiper" id="swiper-actors">
+        <div class="swiper-wrapper" id="swiperActorsWrapper">
+          <!-- Slides générés par JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Swiper JS -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <!-- **************** fin Carrousel des acteurs populaires********************** -->
+
+    <!-- *******************Offcanvas acteur*************************** -->
+    <div
+      class="offcanvas offcanvas-end"
+      tabindex="-1"
+      id="offcanvasActeur"
+      aria-labelledby="offcanvasActeurLabel"
+    >
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasActeurLabel"></h5>
+        <button
+          type="button"
+          class="btn-close text-reset"
+          data-bs-dismiss="offcanvas"
+          aria-label="Fermer"
+        ></button>
+      </div>
+      <div class="offcanvas-body">
+        <div class="row">
+          <div class="col-12 col-md-4 text-center mb-3 mb-md-0">
+            <img
+              id="acteurPhoto"
+              class="img-fluid rounded"
+              src=""
+              alt="Photo acteur"
+            />
+          </div>
+          <div class="col-12 col-md-8">
+            <p>
+              <strong>Date de naissance :</strong>
+              <span id="acteurNaissance"></span>
+            </p>
+            <p><strong>Âge :</strong> <span id="acteurAge"></span></p>
+            <p id="acteurBio"></p>
+          </div>
+        </div>
+        <hr />
+        <h5>Ses 5 meilleurs films</h5>
+        <div class="row" id="acteurFilms"></div>
+      </div>
+    </div>
+    <!-- ******************* fin Offcanvas acteur*************************** -->
+
+    <!-- ************Offcanvas tout les films acteur (à gauche) ****************-->
+    <div
+      class="offcanvas offcanvas-start"
+      tabindex="-1"
+      id="offcanvasFilmsActeur"
+      aria-labelledby="offcanvasFilmsActeurLabel"
+    >
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasFilmsActeurLabel">
+          Tous les films
+        </h5>
+        <button
+          type="button"
+          class="btn-close text-reset"
+          data-bs-dismiss="offcanvas"
+          aria-label="Fermer"
+        ></button>
+      </div>
+      <div class="offcanvas-body">
+        <div class="row" id="tousLesFilmsActeur"></div>
+      </div>
+    </div>
+    <!-- ************Offcanvas tout les films acteur (à gauche) ****************-->
+
+    <!-- Offcanvas détails film (par-dessus, à gauche) -->
+    <div
+      class="offcanvas offcanvas-start"
+      tabindex="-1"
+      id="offcanvasDetailFilm"
+      aria-labelledby="offcanvasDetailFilmLabel"
+    >
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasDetailFilmLabel">
+          Détail du film
+        </h5>
+        <button
+          type="button"
+          class="btn-close text-reset"
+          data-bs-dismiss="offcanvas"
+          aria-label="Fermer"
+        ></button>
+      </div>
+      <div class="offcanvas-body" id="contenuDetailFilm"></div>
+    </div>
+    <!-- fin Offcanvas détails film (par-dessus, à gauche) -->
+
     <!-- Bootstrap JS -->
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
@@ -204,5 +297,6 @@
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <!-- Custom JS -->
     <script src="script.js"></script>
+    <script src="https://unpkg.com/ionicons@4.5.10-0/dist/ionicons.js"></script>
   </body>
 </html>
