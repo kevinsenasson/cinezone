@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ma liste personnalisée - cinezone</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      crossorigin="anonymous"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <!-- ==================== HEADER ==================== -->
+    <header class="container py-3">
+      <div class="row align-items-center">
+        <h1 class="col-12 col-md-6 text-center text-md-start mb-3 mb-md-0">
+          Ma liste personnalisée
+        </h1>
+        <div
+          class="col-12 col-md-6 d-flex justify-content-center justify-content-md-end"
+        >
+          <a href="index.html" class="btn btn-outline-primary">
+            <i class="bi bi-arrow-left"></i> Retour à l'accueil
+          </a>
+        </div>
+      </div>
+    </header>
+    <hr />
+
+    <div class="container my-4">
+      <!-- ==================== FILMS ==================== -->
+      <h2><i class="bi bi-film"></i> Films</h2>
+      <div class="row" id="liste-films"></div>
+      <hr />
+
+      <!-- ==================== SERIES & EMISSIONS TV ==================== -->
+      <h2><i class="bi bi-tv"></i> Séries & Émissions TV</h2>
+      <div class="row" id="liste-series-emissiontv"></div>
+      <hr />
+
+      <!-- ==================== ACTEURS ==================== -->
+      <h2><i class="bi bi-person"></i> Acteurs</h2>
+      <div class="row" id="liste-acteurs"></div>
+    </div>
+
+    <!-- ==================== MODAL DETAILS FILM ==================== -->
+    <div
+      class="modal fade"
+      id="filmDetailsModal"
+      tabindex="-1"
+      aria-labelledby="filmDetailsModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="filmDetailsModalLabel">Détails</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Fermer"
+            ></button>
+          </div>
+          <div class="modal-body" id="filmDetailsModalBody"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== OFFCANVAS ACTEUR (DROITE) ==================== -->
+    <div
+      class="offcanvas offcanvas-end"
+      tabindex="-1"
+      id="offcanvasActeur"
+      aria-labelledby="offcanvasActeurLabel"
+    >
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasActeurLabel"></h5>
+        <button
+          type="button"
+          class="btn-close text-reset"
+          data-bs-dismiss="offcanvas"
+          aria-label="Fermer"
+        ></button>
+      </div>
+      <div class="offcanvas-body" id="offcanvasActeurBody"></div>
+    </div>
+
+    <!-- ==================== OFFCANVAS FILMS ACTEUR (GAUCHE) ==================== -->
+    <div
+      class="offcanvas offcanvas-start"
+      tabindex="-1"
+      id="offcanvasFilmsActeur"
+      aria-labelledby="offcanvasFilmsActeurLabel"
+    >
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasFilmsActeurLabel"></h5>
+        <button
+          type="button"
+          class="btn-close text-reset"
+          data-bs-dismiss="offcanvas"
+          aria-label="Fermer"
+        ></button>
+      </div>
+      <div class="offcanvas-body" id="offcanvasFilmsActeurBody"></div>
+    </div>
+
+    <!-- ==================== SCRIPTS ==================== -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script src="script-liste.js"></script>
+  </body>
+</html>

@@ -1,7 +1,55 @@
 // ==================== VARIABLES GLOBALES ET GENRES ====================
 const apiKey = "c60699cfb590fac613bd4224390bd432";
-const maListe = [];
 let genreMap = {};
+
+// ==================== GESTION DE LA LISTE PERSONNALISÉE ====================
+function getListePerso() {
+  let liste = JSON.parse(localStorage.getItem('listePerso') || '{}');
+  if (!liste.films) liste.films = [];
+  if (!liste.series) liste.series = [];
+  if (!liste.emissiontv) liste.emissiontv = [];
+  if (!liste.acteurs) liste.acteurs = [];
+  return liste;
+}
+function saveListePerso(liste) {
+  localStorage.setItem('listePerso', JSON.stringify(liste));
+}
+function estDansListePerso(itemId, type) {
+  const liste = getListePerso();
+  let arr;
+  if (type === "film") arr = liste.films;
+  else if (type === "serie") arr = liste.series;
+  else if (type === "emissiontv") arr = liste.emissiontv;
+  else if (type === "acteur") arr = liste.acteurs;
+  return arr && arr.some(el => String(el.id) === String(itemId));
+}
+function ajouterALaListePerso(item, type) {
+  const liste = getListePerso();
+  let arr;
+  if (type === "film") arr = liste.films;
+  else if (type === "serie") arr = liste.series;
+  else if (type === "emissiontv") arr = liste.emissiontv;
+  else if (type === "acteur") arr = liste.acteurs;
+  if (!arr.find(el => el.id === item.id)) {
+    arr.push(item);
+    saveListePerso(liste);
+    afficherMessage("Ajouté à votre liste personnalisée !");
+  }
+}
+function retirerDeLaListePerso(itemId, type) {
+  const liste = getListePerso();
+  let arr;
+  if (type === "film") arr = liste.films;
+  else if (type === "serie") arr = liste.series;
+  else if (type === "emissiontv") arr = liste.emissiontv;
+  else if (type === "acteur") arr = liste.acteurs;
+  const idx = arr.findIndex(el => String(el.id) === String(itemId));
+  if (idx !== -1) {
+    arr.splice(idx, 1);
+    saveListePerso(liste);
+    afficherMessage("Retiré de votre liste personnalisée !");
+  }
+}
 
 // Genres pour les différents types
 const genresMovie = [
@@ -178,11 +226,10 @@ async function afficherDetailsFilm(film) {
     const responseCredits = await fetch(urlCredits);
     const dataCredits = await responseCredits.json();
 
-    // Vérifier si les données du film sont disponibles
     document.getElementById("filmPoster").src = film.poster_path
       ? `https://image.tmdb.org/t/p/w500${film.poster_path}`
       : "https://via.placeholder.com/500x750?text=Image+non+disponible";
-    document.getElementById("filmTitle").textContent = film.title || "Titre non disponible";
+    document.getElementById("filmTitle").textContent = film.title || film.name || "Titre non disponible";
     document.getElementById("filmRating").textContent = film.vote_average
       ? film.vote_average.toFixed(1)
       : "N/A";
@@ -213,6 +260,21 @@ async function afficherDetailsFilm(film) {
     } else {
       actorsList.innerHTML = "<p>Aucun acteur trouvé</p>";
     }
+
+    // Bouton liste personnalisée
+    const btnZone = document.getElementById("addToListButton");
+    if (btnZone) {
+      const dejaAjoute = estDansListePerso(film.id, "film");
+      if (dejaAjoute) {
+        btnZone.innerHTML = `<i class="bi bi-check-circle"></i> Ajouté <button class="btn btn-danger btn-sm ms-2" onclick="if(confirm('Retirer de la liste ?')){retirerDeLaListePerso(${film.id},'film');afficherDetailsFilm(${JSON.stringify(film)})}"><i class="bi bi-x"></i></button>`;
+        btnZone.disabled = true;
+      } else {
+        btnZone.innerHTML = `<i class="bi bi-plus"></i> Ajouter à ma liste personnalisée`;
+        btnZone.disabled = false;
+        btnZone.onclick = () => { ajouterALaListePerso(film, "film"); afficherDetailsFilm(film); };
+      }
+    }
+
     // Afficher la modal
     const modal = new bootstrap.Modal(document.getElementById("filmDetailsModal"));
     modal.show();
@@ -245,6 +307,11 @@ async function chargerFilmsTendances() {
     const note = film.vote_average.toFixed(1);
     const votes = film.vote_count;
     const genres = film.genre_ids.map((id) => genreMap[id]).join(", ");
+    const dejaAjoute = estDansListePerso(film.id, "film");
+    const btnGroup = dejaAjoute
+      ? `<button class="btn btn-success btn-sm" disabled><i class="bi bi-check-circle"></i> Ajouté</button>
+         <button class="btn btn-danger btn-sm ms-2" onclick="if(confirm('Retirer de la liste ?')){retirerDeLaListePerso(${film.id},'film');chargerFilmsTendances();}"><i class="bi bi-x"></i></button>`
+      : `<button class="btn btn-outline-primary btn-sm" onclick="ajouterALaListePerso(${JSON.stringify(film)},'film');chargerFilmsTendances();"><i class="bi bi-plus"></i> Ajouter à ma liste</button>`;
     const item = `
       <div class="carousel-item ${isActive}">
         <img src="${imageUrl}" alt="${film.title}" class="d-block w-100">
@@ -258,9 +325,7 @@ async function chargerFilmsTendances() {
             <i class="bi bi-hand-thumbs-up"></i> ${votes} votes
           </p>
           <div class="btn-group">
-            <button class="btn btn-success btn-sm" onclick="ajouterALaListe(this, '${film.title}')">
-              Ajouter à ma liste
-            </button>
+            ${btnGroup}
           </div>
         </div>
       </div>`;
@@ -268,44 +333,180 @@ async function chargerFilmsTendances() {
   });
 }
 
-// ==================== GESTION DE LA LISTE PERSONNELLE ====================
+// ==================== AFFICHAGE DES CARDS ====================
+function displayMovies(movies, container, append = false) {
+  if (!append) container.innerHTML = "";
+  if (!movies.length) {
+    container.innerHTML = "<div class='text-center my-5 w-100'>Aucun film trouvé.</div>";
+    return;
+  }
+  movies.forEach(film => {
+    const col = document.createElement("div");
+    col.className = "col-12 col-md-6 col-lg-4 mb-4";
+    const card = document.createElement("div");
+    card.className = "card h-100";
+    card.style.cursor = "pointer";
+    card.innerHTML = `
+      <img src="${film.poster_path ? "https://image.tmdb.org/t/p/w500" + film.poster_path : "https://via.placeholder.com/500x750?text=No+Image"}" class="card-img-top" alt="${film.title}">
+      <div class="card-body">
+        <h5 class="card-title" title="${film.title}">${film.title}</h5>
+        <p class="card-text">
+          <span class="badge bg-violet text-white"><i class="bi bi-star-fill"></i> ${film.vote_average ? film.vote_average.toFixed(1) : "N/A"} / 10</span>
+        </p>
+        <div class="d-flex gap-2">
+          <button class="btn ${estDansListePerso(film.id, "film") ? "btn-success" : "btn-outline-primary"} btn-sm flex-grow-1 btn-ajout-liste">
+            <i class="bi ${estDansListePerso(film.id, "film") ? "bi-check-circle" : "bi-plus"}"></i> 
+            ${estDansListePerso(film.id, "film") ? "Ajouté" : "Ajouter à ma liste"}
+          </button>
+          ${estDansListePerso(film.id, "film") ? `<button class="btn btn-danger btn-sm btn-retirer-liste"><i class="bi bi-x"></i></button>` : ""}
+        </div>
+      </div>
+    `;
+    // Ajout direct sans ouvrir le modal
+    card.querySelector('.btn-ajout-liste').addEventListener('click', function(e) {
+      e.stopPropagation();
+      if (!estDansListePerso(film.id, "film")) {
+        ajouterALaListePerso(film, "film");
+        fetchAndDisplay();
+      }
+    });
+    // Retirer de la liste
+    if (estDansListePerso(film.id, "film")) {
+      card.querySelector('.btn-retirer-liste').addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (confirm('Retirer de la liste ?')) {
+          retirerDeLaListePerso(film.id, "film");
+          fetchAndDisplay();
+        }
+      });
+    }
+    // Clic sur la card = ouvrir le modal
+    card.addEventListener("click", () => afficherDetailsFilm(film));
+    col.appendChild(card);
+    container.appendChild(col);
+  });
+}
+function displayTV(series, container, append = false) {
+  if (!append) container.innerHTML = "";
+  if (!series.length) {
+    container.innerHTML = "<div class='text-center my-5 w-100'>Aucune série trouvée.</div>";
+    return;
+  }
+  series.forEach(serie => {
+    const col = document.createElement("div");
+    col.className = "col-12 col-md-6 col-lg-4 mb-4";
+    const card = document.createElement("div");
+    card.className = "card h-100";
+    card.style.cursor = "pointer";
+    card.innerHTML = `
+      <img src="${serie.poster_path ? "https://image.tmdb.org/t/p/w500" + serie.poster_path : "https://via.placeholder.com/500x750?text=No+Image"}" class="card-img-top" alt="${serie.name}">
+      <div class="card-body">
+        <h5 class="card-title" title="${serie.name}">${serie.name}</h5>
+        <p class="card-text">
+          <span class="badge bg-violet text-white"><i class="bi bi-star-fill"></i> ${serie.vote_average ? serie.vote_average.toFixed(1) : "N/A"} / 10</span>
+        </p>
+        <div class="d-flex gap-2">
+          <button class="btn ${estDansListePerso(serie.id, "serie") ? "btn-success" : "btn-outline-primary"} btn-sm flex-grow-1 btn-ajout-liste">
+            <i class="bi ${estDansListePerso(serie.id, "serie") ? "bi-check-circle" : "bi-plus"}"></i> 
+            ${estDansListePerso(serie.id, "serie") ? "Ajouté" : "Ajouter à ma liste"}
+          </button>
+          ${estDansListePerso(serie.id, "serie") ? `<button class="btn btn-danger btn-sm btn-retirer-liste"><i class="bi bi-x"></i></button>` : ""}
+        </div>
+      </div>
+    `;
+    card.querySelector('.btn-ajout-liste').addEventListener('click', function(e) {
+      e.stopPropagation();
+      if (!estDansListePerso(serie.id, "serie")) {
+        ajouterALaListePerso(serie, "serie");
+        fetchAndDisplay();
+      }
+    });
+    if (estDansListePerso(serie.id, "serie")) {
+      card.querySelector('.btn-retirer-liste').addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (confirm('Retirer de la liste ?')) {
+          retirerDeLaListePerso(serie.id, "serie");
+          fetchAndDisplay();
+        }
+      });
+    }
+    card.addEventListener("click", () => afficherDetailsFilm(serie));
+    col.appendChild(card);
+    container.appendChild(col);
+  });
+}
+
+function displayActors(actors, container, append = false) {
+  if (!append) container.innerHTML = "";
+  if (!actors.length) {
+    container.innerHTML = "<div class='text-center my-5 w-100'>Aucun acteur trouvé.</div>";
+    return;
+  }
+  actors.forEach(acteur => {
+    const col = document.createElement("div");
+    col.className = "col-12 col-md-6 col-lg-4 mb-4";
+    const card = document.createElement("div");
+    card.className = "card h-100 text-center";
+    card.style.cursor = "pointer";
+    card.innerHTML = `
+      <img src="${acteur.profile_path ? "https://image.tmdb.org/t/p/w500" + acteur.profile_path : "https://via.placeholder.com/500x750?text=No+Image"}" class="card-img-top" alt="${acteur.name}">
+      <div class="card-body">
+        <h5 class="card-title" title="${acteur.name}">${acteur.name}</h5>
+        <p class="card-text">
+          <span class="badge bg-primary">Acteur</span>
+        </p>
+        <div class="d-flex gap-2">
+          <button class="btn ${estDansListePerso(acteur.id, "acteur") ? "btn-success" : "btn-outline-primary"} btn-sm flex-grow-1 btn-ajout-liste">
+            <i class="bi ${estDansListePerso(acteur.id, "acteur") ? "bi-check-circle" : "bi-plus"}"></i> 
+            ${estDansListePerso(acteur.id, "acteur") ? "Ajouté" : "Ajouter à ma liste"}
+          </button>
+          ${estDansListePerso(acteur.id, "acteur") ? `<button class="btn btn-danger btn-sm btn-retirer-liste"><i class="bi bi-x"></i></button>` : ""}
+        </div>
+      </div>
+    `;
+    card.querySelector('.btn-ajout-liste').addEventListener('click', function(e) {
+      e.stopPropagation();
+      if (!estDansListePerso(acteur.id, "acteur")) {
+        ajouterALaListePerso(acteur, "acteur");
+        fetchAndDisplay();
+      }
+    });
+    if (estDansListePerso(acteur.id, "acteur")) {
+      card.querySelector('.btn-retirer-liste').addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (confirm('Retirer de la liste ?')) {
+          retirerDeLaListePerso(acteur.id, "acteur");
+          fetchAndDisplay();
+        }
+      });
+    }
+    card.addEventListener("click", () => afficherDetailsActeur(acteur.id));
+    col.appendChild(card);
+    container.appendChild(col);
+  });
+}
+
+// ==================== GESTION DU BOUTON "CHARGER PLUS" ====================
+document.getElementById("btnChargerPlus").addEventListener("click", () => {
+  currentPage++;
+  fetchAndDisplay(true);
+});
+
+// ==================== RESET PAGE ====================
+function resetAndFetch() {
+  currentPage = 1;
+  fetchAndDisplay();
+}
+
+// ==================== MESSAGE ====================
 function afficherMessage(message) {
   const messageDiv = document.getElementById("message");
+  if (!messageDiv) return;
   messageDiv.textContent = message;
   messageDiv.style.display = "block";
   setTimeout(() => {
     messageDiv.style.display = "none";
   }, 3000);
-}
-function ajouterALaListe(button, titreFilm) {
-  if (!maListe.includes(titreFilm)) {
-    maListe.push(titreFilm);
-    const parentDiv = button.parentElement;
-    parentDiv.innerHTML = `
-      <button class="btn btn-secondary btn-sm" disabled>
-        <i class="bi bi-check-circle-fill"></i> Ajouté
-      </button>
-      <button class="btn btn-danger btn-sm" onclick="supprimerDeLaListe('${titreFilm}', this)">
-        <i class="bi bi-x-circle"></i>
-      </button>`;
-    afficherMessage(
-      `"${titreFilm}" a été ajouté à votre liste personnalisée.`
-    );
-  }
-}
-function supprimerDeLaListe(titreFilm, deleteButton) {
-  const index = maListe.indexOf(titreFilm);
-  if (index !== -1) {
-    maListe.splice(index, 1);
-    const parentDiv = deleteButton.parentElement;
-    parentDiv.innerHTML = `
-      <button class="btn btn-success btn-sm" onclick="ajouterALaListe(this, '${titreFilm}')">
-        Ajouter à ma liste
-      </button>`;
-    afficherMessage(
-      `"${titreFilm}" a été supprimé de votre liste personnalisée.`
-    );
-  }
 }
 
 // ==================== INITIALISATION AU CHARGEMENT ====================
@@ -640,96 +841,4 @@ async function fetchAndDisplay(append = false) {
     displayActors(results, container, append);
   }
   document.getElementById("btnChargerPlus").style.display = (currentPage < totalPages) ? "inline-block" : "none";
-}
-
-// ==================== AFFICHAGE DES CARDS ====================
-function displayMovies(movies, container, append = false) {
-  if (!append) container.innerHTML = "";
-  if (!movies.length) {
-    container.innerHTML = "<div class='text-center my-5 w-100'>Aucun film trouvé.</div>";
-    return;
-  }
-  movies.forEach(film => {
-    const col = document.createElement("div");
-    col.className = "col-12 col-md-6 col-lg-4 mb-4";
-    const card = document.createElement("div");
-    card.className = "card h-100";
-    card.style.cursor = "pointer";
-    card.innerHTML = `
-      <img src="${film.poster_path ? "https://image.tmdb.org/t/p/w500" + film.poster_path : "https://via.placeholder.com/500x750?text=No+Image"}" class="card-img-top" alt="${film.title}">
-      <div class="card-body">
-        <h5 class="card-title" title="${film.title}">${film.title}</h5>
-        <p class="card-text">
-          <span class="badge bg-violet text-white"><i class="bi bi-star-fill"></i> ${film.vote_average ? film.vote_average.toFixed(1) : "N/A"} / 10</span>
-        </p>
-      </div>
-    `;
-    card.addEventListener("click", () => afficherDetailsFilm(film));
-    col.appendChild(card);
-    container.appendChild(col);
-  });
-}
-function displayTV(series, container, append = false) {
-  if (!append) container.innerHTML = "";
-  if (!series.length) {
-    container.innerHTML = "<div class='text-center my-5 w-100'>Aucune série trouvée.</div>";
-    return;
-  }
-  series.forEach(serie => {
-    const col = document.createElement("div");
-    col.className = "col-12 col-md-6 col-lg-4 mb-4";
-    const card = document.createElement("div");
-    card.className = "card h-100";
-    card.style.cursor = "pointer";
-    card.innerHTML = `
-      <img src="${serie.poster_path ? "https://image.tmdb.org/t/p/w500" + serie.poster_path : "https://via.placeholder.com/500x750?text=No+Image"}" class="card-img-top" alt="${serie.name}">
-      <div class="card-body">
-        <h5 class="card-title" title="${serie.name}">${serie.name}</h5>
-        <p class="card-text">
-          <span class="badge bg-violet text-white"><i class="bi bi-star-fill"></i> ${serie.vote_average ? serie.vote_average.toFixed(1) : "N/A"} / 10</span>
-        </p>
-      </div>
-    `;
-    card.addEventListener("click", () => afficherDetailsFilm(serie));
-    col.appendChild(card);
-    container.appendChild(col);
-  });
-}
-function displayActors(actors, container, append = false) {
-  if (!append) container.innerHTML = "";
-  if (!actors.length) {
-    container.innerHTML = "<div class='text-center my-5 w-100'>Aucun acteur trouvé.</div>";
-    return;
-  }
-  actors.forEach(acteur => {
-    const col = document.createElement("div");
-    col.className = "col-12 col-md-6 col-lg-4 mb-4";
-    const card = document.createElement("div");
-    card.className = "card h-100 text-center";
-    card.style.cursor = "pointer";
-    card.innerHTML = `
-      <img src="${acteur.profile_path ? "https://image.tmdb.org/t/p/w500" + acteur.profile_path : "https://via.placeholder.com/500x750?text=No+Image"}" class="card-img-top" alt="${acteur.name}">
-      <div class="card-body">
-        <h5 class="card-title" title="${acteur.name}">${acteur.name}</h5>
-        <p class="card-text">
-          <span class="badge bg-primary">Acteur</span>
-        </p>
-      </div>
-    `;
-    card.addEventListener("click", () => afficherDetailsActeur(acteur.id));
-    col.appendChild(card);
-    container.appendChild(col);
-  });
-}
-
-// ==================== GESTION DU BOUTON "CHARGER PLUS" ====================
-document.getElementById("btnChargerPlus").addEventListener("click", () => {
-  currentPage++;
-  fetchAndDisplay(true);
-});
-
-// ==================== RESET PAGE ====================
-function resetAndFetch() {
-  currentPage = 1;
-  fetchAndDisplay();
 }
