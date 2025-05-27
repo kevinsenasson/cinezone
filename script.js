@@ -566,6 +566,96 @@ const genresTVShow = [
   { id: 99, name: "Documentaire" }
 ];
 
+// ================== FILTRES ET SYNC ==================
+// ...existing code...
+
+// Synchronisation du menu déroulant catégorie avec les boutons
+document.getElementById('typeSelect').addEventListener('change', function () {
+  const value = this.value;
+  document.querySelectorAll('.type-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.type === value);
+  });
+  // Déclenche l'action de filtre (remplace par ta fonction si besoin)
+  document.querySelector(`.type-btn[data-type="${value}"]`).click();
+});
+
+// Synchronisation des boutons avec le menu déroulant catégorie
+document.querySelectorAll('.type-btn').forEach(btn => {
+  btn.addEventListener('click', function () {
+    document.getElementById('typeSelect').value = this.dataset.type;
+  });
+});
+
+// Génération dynamique des genres dans le select mobile
+function updateGenreSelect() {
+  const genreBtns = document.querySelectorAll('#genreFilters .genre-btn');
+  const genreSelect = document.getElementById('genreSelect');
+  if (!genreSelect) return;
+  genreSelect.innerHTML = '';
+  genreBtns.forEach(btn => {
+    const option = document.createElement('option');
+    option.value = btn.dataset.genre;
+    option.textContent = btn.textContent.trim();
+    if (btn.classList.contains('active')) option.selected = true;
+    genreSelect.appendChild(option);
+  });
+}
+updateGenreSelect();
+
+// Quand un genre est sélectionné sur mobile
+document.getElementById('genreSelect').addEventListener('change', function () {
+  const value = this.value;
+  document.querySelectorAll('.genre-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.genre === value);
+    if (btn.dataset.genre === value) btn.click();
+  });
+});
+
+// Synchronisation des boutons genre avec le select mobile
+document.querySelectorAll('.genre-btn').forEach(btn => {
+  btn.addEventListener('click', function () {
+    document.getElementById('genreSelect').value = this.dataset.genre;
+  });
+});
+
+// ...existing code...
+
+function updateGenreSelect() {
+  const genreBtns = document.querySelectorAll('#genreFilters .genre-btn');
+  const genreSelect = document.getElementById('genreSelect');
+  if (!genreSelect) return;
+  genreSelect.innerHTML = '';
+  genreBtns.forEach(btn => {
+    const option = document.createElement('option');
+    option.value = btn.dataset.genre;
+    option.textContent = btn.textContent.trim();
+    if (btn.classList.contains('active')) option.selected = true;
+    genreSelect.appendChild(option);
+  });
+}
+
+// Appelle cette fonction CHAQUE FOIS que tu génères ou modifies les boutons de genre
+updateGenreSelect();
+
+// Synchronisation du select genre avec les boutons
+document.getElementById('genreSelect').addEventListener('change', function () {
+  const value = this.value;
+  document.querySelectorAll('.genre-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.genre === value);
+    if (btn.dataset.genre === value) btn.click();
+  });
+});
+
+// Synchronisation des boutons genre avec le select mobile
+document.querySelectorAll('.genre-btn').forEach(btn => {
+  btn.addEventListener('click', function () {
+    document.getElementById('genreSelect').value = this.dataset.genre;
+  });
+});
+
+// ...existing code...
+// ==================  FIN FILTRES ET SYNC ==================
+
 // ================== INIT ==================
 let currentType = "movie";
 let currentGenre = "all";
@@ -586,6 +676,7 @@ function renderGenres() {
   // Pas de genre pour les acteurs
   if (currentType === "person") {
     genreFilters.innerHTML = "";
+    updateGenreSelect(); // <-- Ajoute ceci pour vider le select mobile
     return;
   }
   genres.forEach(g => {
@@ -599,9 +690,11 @@ function renderGenres() {
       btn.classList.remove("btn-outline-secondary");
       currentGenre = g.id;
       fetchAndDisplay();
+      updateGenreSelect(); // <-- Ajoute ceci pour synchroniser le select mobile
     };
     genreFilters.appendChild(btn);
   });
+  updateGenreSelect(); // <-- Ajoute ceci à la fin de la fonction
 }
 
 // ================== RENDU DES TYPES ==================
@@ -647,86 +740,74 @@ async function fetchAndDisplay(append = false) {
 }
 
 // ================== AFFICHAGE DES CARDS ==================
-function displayMovies(movies, container, append = false) {
-  if (!append) container.innerHTML = "";
+function displayMovies(movies, container) {
   if (!movies.length) {
     container.innerHTML = "<div class='text-center my-5 w-100'>Aucun film trouvé.</div>";
     return;
   }
+  container.innerHTML = "";
   movies.forEach(film => {
-    const col = document.createElement("div");
-    col.className = "col-12 col-md-6 col-lg-4 mb-4";
-    const card = document.createElement("div");
-    card.className = "card h-100";
-    card.style.cursor = "pointer";
-    card.innerHTML = `
-      <img src="${film.poster_path ? "https://image.tmdb.org/t/p/w500" + film.poster_path : ""}" class="card-img-top" alt="${film.title}">
-      <div class="card-body">
-        <h5 class="card-title" title="${film.title}">${film.title}</h5>
-        <p class="card-text">
-          <span class="badge bg-warning text-dark"><i class="bi bi-star-fill"></i> ${film.vote_average ? film.vote_average.toFixed(1) : "N/A"} / 10</span>
-        </p>
+    container.innerHTML += `
+      <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
+        <div class="card h-100">
+          <img src="${film.poster_path ? "https://image.tmdb.org/t/p/w500" + film.poster_path : "https://via.placeholder.com/500x750?text=No+Image"}" class="card-img-top" alt="${film.title}">
+          <div class="card-body">
+            <h5 class="card-title" title="${film.title}">${film.title}</h5>
+            <p class="card-text">
+              <span class="badge bg-warning text-dark"><i class="bi bi-star-fill"></i> ${film.vote_average ? film.vote_average.toFixed(1) : "N/A"} / 10</span>
+            </p>
+          </div>
+        </div>
       </div>
     `;
-    card.addEventListener("click", () => afficherDetailsFilm(film));
-    col.appendChild(card);
-    container.appendChild(col);
   });
 }
 
-function displayTV(series, container, append = false) {
-  if (!append) container.innerHTML = "";
+function displayTV(series, container) {
   if (!series.length) {
     container.innerHTML = "<div class='text-center my-5 w-100'>Aucune série trouvée.</div>";
     return;
   }
+  container.innerHTML = "";
   series.forEach(serie => {
-    const col = document.createElement("div");
-    col.className = "col-12 col-md-6 col-lg-4 mb-4";
-    const card = document.createElement("div");
-    card.className = "card h-100";
-    card.style.cursor = "pointer";
-    card.innerHTML = `
-      <img src="${serie.poster_path ? "https://image.tmdb.org/t/p/w500" + serie.poster_path : ""}" class="card-img-top" alt="${serie.name}">
-      <div class="card-body">
-        <h5 class="card-title" title="${serie.name}">${serie.name}</h5>
-        <p class="card-text">
-          <span class="badge bg-warning text-dark"><i class="bi bi-star-fill"></i> ${serie.vote_average ? serie.vote_average.toFixed(1) : "N/A"} / 10</span>
-        </p>
+    container.innerHTML += `
+      <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
+        <div class="card h-100">
+          <img src="${serie.poster_path ? "https://image.tmdb.org/t/p/w500" + serie.poster_path : "https://via.placeholder.com/500x750?text=No+Image"}" class="card-img-top" alt="${serie.name}">
+          <div class="card-body">
+            <h5 class="card-title" title="${serie.name}">${serie.name}</h5>
+            <p class="card-text">
+              <span class="badge bg-warning text-dark"><i class="bi bi-star-fill"></i> ${serie.vote_average ? serie.vote_average.toFixed(1) : "N/A"} / 10</span>
+            </p>
+          </div>
+        </div>
       </div>
     `;
-    // Tu peux ajouter un event ici si tu veux ouvrir un détail série
-    col.appendChild(card);
-    container.appendChild(col);
   });
 }
 
-function displayActors(actors, container, append = false) {
-  if (!append) container.innerHTML = "";
+function displayActors(actors, container) {
   if (!actors.length) {
     container.innerHTML = "<div class='text-center my-5 w-100'>Aucun acteur trouvé.</div>";
     return;
   }
+  container.innerHTML = "";
   actors.forEach(acteur => {
-    const col = document.createElement("div");
-    col.className = "col-12 col-md-6 col-lg-4 mb-4";
-    const card = document.createElement("div");
-    card.className = "card h-100 text-center";
-    card.style.cursor = "pointer";
-    card.innerHTML = `
-      <img src="${acteur.profile_path ? "https://image.tmdb.org/t/p/w500" + acteur.profile_path : ""}" class="card-img-top" alt="${acteur.name}">
-      <div class="card-body">
-        <h5 class="card-title" title="${acteur.name}">${acteur.name}</h5>
-        <p class="card-text">
-          <span class="badge bg-primary">Acteur</span>
-        </p>
+    container.innerHTML += `
+      <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
+        <div class="card h-100 text-center">
+          <img src="${acteur.profile_path ? "https://image.tmdb.org/t/p/w500" + acteur.profile_path : "https://via.placeholder.com/500x750?text=No+Image"}" class="card-img-top" alt="${acteur.name}">
+          <div class="card-body">
+            <h5 class="card-title" title="${acteur.name}">${acteur.name}</h5>
+            <p class="card-text">
+              <span class="badge bg-primary">Acteur</span>
+            </p>
+          </div>
+        </div>
       </div>
     `;
-    card.addEventListener("click", () => afficherDetailsActeur(acteur.id));
-    col.appendChild(card);
-    container.appendChild(col);
   });
-}y
+}
 
 let currentPage = 1;
 let totalPages = 1;

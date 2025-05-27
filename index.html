@@ -267,33 +267,58 @@
     <hr />
 
     <!-- ================== Filtres Type & Genre ================== -->
-    <div class="container my-4">
-      <!-- Filtres Type -->
-      <div class="d-flex justify-content-center gap-3 mb-3 flex-wrap">
-        <button class="btn btn-primary type-btn active" data-type="movie">
-          Films
-        </button>
-        <button class="btn btn-outline-primary type-btn" data-type="tv">
-          Séries
-        </button>
-        <button class="btn btn-outline-primary type-btn" data-type="tvshow">
-          Émissions TV
-        </button>
-        <button class="btn btn-outline-primary type-btn" data-type="person">
-          Acteurs
-        </button>
-      </div>
-      <!-- Filtres Genre -->
-      <div
-        class="d-flex justify-content-center gap-2 mb-4 flex-wrap"
-        id="genreFilters"
-      >
-        <button class="btn btn-secondary genre-btn active" data-genre="all">
-          Tout
-        </button>
-        <!-- Les genres seront générés dynamiquement -->
-      </div>
+    <!-- ...existing code... -->
+    <!-- Filtres Type -->
+    <div
+      class="d-flex justify-content-center gap-3 mb-3 flex-wrap d-none d-md-flex"
+      id="typeButtons"
+    >
+      <button class="btn btn-primary type-btn active" data-type="movie">
+        Films
+      </button>
+      <button class="btn btn-outline-primary type-btn" data-type="tv">
+        Séries
+      </button>
+      <button class="btn btn-outline-primary type-btn" data-type="tvshow">
+        Émissions TV
+      </button>
+      <button class="btn btn-outline-primary type-btn" data-type="person">
+        Acteurs
+      </button>
     </div>
+    <!-- Menu déroulant mobile -->
+    <div
+      class="mb-3 d-flex justify-content-center d-md-none"
+      id="typeSelectWrapper"
+    >
+      <select class="form-select w-auto" id="typeSelect">
+        <option value="movie">Films</option>
+        <option value="tv">Séries</option>
+        <option value="tvshow">Émissions TV</option>
+        <option value="person">Acteurs</option>
+      </select>
+    </div>
+    <!-- Filtres Genre -->
+    <div
+      class="d-flex justify-content-center gap-2 mb-4 flex-wrap d-none d-md-flex"
+      id="genreFilters"
+    >
+      <button class="btn btn-secondary genre-btn active" data-genre="all">
+        Tout
+      </button>
+      <!-- Les genres seront générés dynamiquement -->
+    </div>
+    <!-- Menu déroulant mobile pour les genres -->
+    <div
+      class="mb-4 d-flex justify-content-center d-md-none"
+      id="genreSelectWrapper"
+    >
+      <select class="form-select w-auto" id="genreSelect">
+        <option value="all">Tout</option>
+        <!-- Les genres seront générés dynamiquement par JS -->
+      </select>
+    </div>
+    <!-- ...existing code... -->
 
     <!-- ================== Zone d'affichage des résultats ================== -->
     <div class="container">

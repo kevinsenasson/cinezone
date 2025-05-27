@@ -483,7 +483,7 @@ h2 {
 /* ************  offcanva acteur tout les film au dessus a gauche  ********************** */
 #offcanvasDetailFilm {
   --bs-offcanvas-width: 700px;
-  background-color: #181818 !important;
+  background-color: #181818;
   color: #fff;
   z-index: 1061; /* Plus haut que les autres offcanvas */
 }
@@ -508,13 +508,13 @@ h2 {
   color: #6a0dad;
   transition: box-shadow 0.2s, background 0.2s, color 0.2s;
   box-shadow: none;
-  opacity: 1 !important; /* Toujours bien visibles */
+  opacity: 1; /* Toujours bien visibles */
 }
 
 .type-btn.active,
 .genre-btn.active {
-  background: #6a0dad !important;
-  color: #ffffff !important; /* Texte noir */
+  background: #6a0dad;
+  color: #ffffff; /* Texte noir */
   border: 2px solid #fff;
   box-shadow: 0 2px 12px rgba(106, 13, 173, 0.12);
 }
@@ -524,7 +524,7 @@ h2 {
   background: #f3e6fa;
   color: #6a0dad;
   border-color: #6a0dad;
-  opacity: 1 !important;
+  opacity: 1;
 }
 #genreFilters {
   flex-wrap: wrap;
@@ -532,6 +532,69 @@ h2 {
 .genre-btn {
   margin-bottom: 6px;
 }
+/* Affiche les boutons sur desktop, cache sur mobile */
+@media (max-width: 767.98px) {
+  #typeButtons,
+  #genreFilters {
+    display: none;
+  }
+  #typeSelectWrapper,
+  #genreSelectWrapper {
+    display: flex;
+  }
+}
+/* Affiche les boutons sur desktop, cache les selects */
+@media (min-width: 768px) {
+  #typeSelectWrapper,
+  #genreSelectWrapper {
+    display: none;
+  }
+}
+
+/* Style personnalisé pour les menus déroulants de filtres (catégorie & genre) */
+#typeSelect,
+#genreSelect {
+  background: #f3e6fa;
+  color: #6a0dad;
+  border: 2px solid #6a0dad;
+  border-radius: 8px;
+  font-weight: 600;
+  min-width: 140px;
+  padding: 6px 18px 6px 10px;
+  box-shadow: 0 2px 12px rgba(106, 13, 173, 0.08);
+  transition: border-color 0.2s, box-shadow 0.2s;
+  appearance: none;
+  outline: none;
+}
+
+#typeSelect:focus,
+#genreSelect:focus {
+  border-color: #5a009d;
+  box-shadow: 0 0 0 2px #e5d1fa;
+  background: #fff;
+  color: #6a0dad;
+}
+
+@media (max-width: 767.98px) {
+  #typeSelect,
+  #genreSelect {
+    font-size: 1.05rem;
+    min-width: 120px;
+    margin-bottom: 8px;
+  }
+}
+
+/* Petite flèche personnalisée pour le select (optionnel) */
+#typeSelect,
+#genreSelect {
+  background-image: url("data:image/svg+xml,%3Csvg width='16' height='16' fill='%236a0dad' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M4 6l4 4 4-4' stroke='%236a0dad' stroke-width='2' fill='none' fill-rule='evenodd'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1.2em;
+  padding-right: 2.2em;
+}
+
+/* *************  fin Boutons de filtre ********************* */
 
 /* ******** Cards des film,série,émissionTV, acteur */
 #resultatsCartes .card {
@@ -574,14 +637,14 @@ h2 {
 
 /* ****pour changer la couleur des note dans les card **** */
 .bg-violet {
-  background: #6a0dad !important;
-  color: #fff !important;
+  background: #6a0dad;
+  color: #fff;
 }
 /* **** fin pour changer la couleur des note dans les card **** */
 
 #btnChargerPlus {
-  background: #6a0dad !important;
-  color: #fff !important;
+  background: #6a0dad;
+  color: #fff;
   border: none;
   font-weight: 600;
   width: 100%;
