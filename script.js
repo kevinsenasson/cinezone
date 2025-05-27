@@ -711,6 +711,12 @@ document.querySelectorAll(".type-btn").forEach(btn => {
 });
 
 // ================== FETCH & DISPLAY ==================
+// ...existing code...
+
+// ================== FETCH & DISPLAY ==================
+let currentPage = 1;
+let totalPages = 1;
+
 async function fetchAndDisplay(append = false) {
   const container = document.getElementById("resultatsCartes");
   if (!append) container.innerHTML = '<div class="text-center my-5 w-100"><div class="spinner-border text-primary"></div></div>';
@@ -740,98 +746,12 @@ async function fetchAndDisplay(append = false) {
 }
 
 // ================== AFFICHAGE DES CARDS ==================
-function displayMovies(movies, container) {
+function displayMovies(movies, container, append = false) {
+  if (!append) container.innerHTML = "";
   if (!movies.length) {
     container.innerHTML = "<div class='text-center my-5 w-100'>Aucun film trouvé.</div>";
     return;
   }
-  container.innerHTML = "";
-  movies.forEach(film => {
-    container.innerHTML += `
-      <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
-        <div class="card h-100">
-          <img src="${film.poster_path ? "https://image.tmdb.org/t/p/w500" + film.poster_path : "https://via.placeholder.com/500x750?text=No+Image"}" class="card-img-top" alt="${film.title}">
-          <div class="card-body">
-            <h5 class="card-title" title="${film.title}">${film.title}</h5>
-            <p class="card-text">
-              <span class="badge bg-warning text-dark"><i class="bi bi-star-fill"></i> ${film.vote_average ? film.vote_average.toFixed(1) : "N/A"} / 10</span>
-            </p>
-          </div>
-        </div>
-      </div>
-    `;
-  });
-}
-
-function displayTV(series, container) {
-  if (!series.length) {
-    container.innerHTML = "<div class='text-center my-5 w-100'>Aucune série trouvée.</div>";
-    return;
-  }
-  container.innerHTML = "";
-  series.forEach(serie => {
-    container.innerHTML += `
-      <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
-        <div class="card h-100">
-          <img src="${serie.poster_path ? "https://image.tmdb.org/t/p/w500" + serie.poster_path : "https://via.placeholder.com/500x750?text=No+Image"}" class="card-img-top" alt="${serie.name}">
-          <div class="card-body">
-            <h5 class="card-title" title="${serie.name}">${serie.name}</h5>
-            <p class="card-text">
-              <span class="badge bg-warning text-dark"><i class="bi bi-star-fill"></i> ${serie.vote_average ? serie.vote_average.toFixed(1) : "N/A"} / 10</span>
-            </p>
-          </div>
-        </div>
-      </div>
-    `;
-  });
-}
-
-function displayActors(actors, container) {
-  if (!actors.length) {
-    container.innerHTML = "<div class='text-center my-5 w-100'>Aucun acteur trouvé.</div>";
-    return;
-  }
-  container.innerHTML = "";
-  actors.forEach(acteur => {
-    container.innerHTML += `
-      <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
-        <div class="card h-100 text-center">
-          <img src="${acteur.profile_path ? "https://image.tmdb.org/t/p/w500" + acteur.profile_path : "https://via.placeholder.com/500x750?text=No+Image"}" class="card-img-top" alt="${acteur.name}">
-          <div class="card-body">
-            <h5 class="card-title" title="${acteur.name}">${acteur.name}</h5>
-            <p class="card-text">
-              <span class="badge bg-primary">Acteur</span>
-            </p>
-          </div>
-        </div>
-      </div>
-    `;
-  });
-}
-
-let currentPage = 1;
-let totalPages = 1;
-
-// Modifie fetchAndDisplay pour gérer la pagination
-async function fetchAndDisplay(append = false) {
-  const container = document.getElementById("resultatsCartes");
-  if (!append) container.innerHTML = '<div class="text-center my-5 w-100"><div class="spinner-border text-primary"></div></div>';
-  let url = "";
-  let results = [];
-  if (currentType === "movie") {
-    url = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&language=fr-FR&sort_by=popularity.desc&page=${currentPage}${currentGenre !== "all" ? "&with_genres=" + currentGenre : ""}`;
-    const data = await fetch(url).then(r => r.json());
-    results = data.results;
-    totalPages = data.total_pages;
-    displayMovies(results, container, append);
-  }
-  // ... (idem pour séries)
-  document.getElementById("btnChargerPlus").style.display = (currentPage < totalPages) ? "inline-block" : "none";
-}
-
-// Modifie displayMovies pour append si besoin
-function displayMovies(movies, container, append = false) {
-  if (!append) container.innerHTML = "";
   movies.forEach(film => {
     const col = document.createElement("div");
     col.className = "col-12 col-md-6 col-lg-4 mb-4";
@@ -847,8 +767,61 @@ function displayMovies(movies, container, append = false) {
         </p>
       </div>
     `;
-    // Ajoute le click pour ouvrir le modal
     card.addEventListener("click", () => afficherDetailsFilm(film));
+    col.appendChild(card);
+    container.appendChild(col);
+  });
+}
+
+function displayTV(series, container, append = false) {
+  if (!append) container.innerHTML = "";
+  if (!series.length) {
+    container.innerHTML = "<div class='text-center my-5 w-100'>Aucune série trouvée.</div>";
+    return;
+  }
+  series.forEach(serie => {
+    const col = document.createElement("div");
+    col.className = "col-12 col-md-6 col-lg-4 mb-4";
+    const card = document.createElement("div");
+    card.className = "card h-100";
+    card.style.cursor = "pointer";
+    card.innerHTML = `
+      <img src="${serie.poster_path ? "https://image.tmdb.org/t/p/w500" + serie.poster_path : "https://via.placeholder.com/500x750?text=No+Image"}" class="card-img-top" alt="${serie.name}">
+      <div class="card-body">
+        <h5 class="card-title" title="${serie.name}">${serie.name}</h5>
+        <p class="card-text">
+          <span class="badge bg-violet text-white"><i class="bi bi-star-fill"></i> ${serie.vote_average ? serie.vote_average.toFixed(1) : "N/A"} / 10</span>
+        </p>
+      </div>
+    `;
+    card.addEventListener("click", () => afficherDetailsFilm(serie));
+    col.appendChild(card);
+    container.appendChild(col);
+  });
+}
+
+function displayActors(actors, container, append = false) {
+  if (!append) container.innerHTML = "";
+  if (!actors.length) {
+    container.innerHTML = "<div class='text-center my-5 w-100'>Aucun acteur trouvé.</div>";
+    return;
+  }
+  actors.forEach(acteur => {
+    const col = document.createElement("div");
+    col.className = "col-12 col-md-6 col-lg-4 mb-4";
+    const card = document.createElement("div");
+    card.className = "card h-100 text-center";
+    card.style.cursor = "pointer";
+    card.innerHTML = `
+      <img src="${acteur.profile_path ? "https://image.tmdb.org/t/p/w500" + acteur.profile_path : "https://via.placeholder.com/500x750?text=No+Image"}" class="card-img-top" alt="${acteur.name}">
+      <div class="card-body">
+        <h5 class="card-title" title="${acteur.name}">${acteur.name}</h5>
+        <p class="card-text">
+          <span class="badge bg-primary">Acteur</span>
+        </p>
+      </div>
+    `;
+    card.addEventListener("click", () => afficherDetailsActeur(acteur.id));
     col.appendChild(card);
     container.appendChild(col);
   });
